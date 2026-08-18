@@ -8,6 +8,7 @@ import {
   type Milestone,
 } from "@/lib/blocks/ops/payment-mock"
 import { Num } from "./num"
+import { COMPANY_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
 type Device = "desktop" | "mobile"
 
@@ -77,15 +78,8 @@ export function PaymentApp({ device }: { device: Device }) {
   }
 
   const roleLabel = "업체 관리자"
-  const menuItems = [
-    "대시보드",
-    "프로젝트 관리",
-    "결제 마일스톤",
-    "견적/계약",
-    "정산",
-    "고객 관리",
-  ]
-  const activeMenu = "결제 마일스톤"
+  const menuItems = COMPANY_MENU
+  const activeMenu = MENU_LABEL.payment
 
   const confirmTarget = milestones.find((m) => m.id === confirmId) ?? null
 
@@ -154,7 +148,7 @@ export function PaymentApp({ device }: { device: Device }) {
         <main className="min-w-0 flex-1 p-4">
           <div className="mb-4 flex items-start justify-between gap-2">
             <div>
-              <h1 className="text-base font-bold">결제 마일스톤 관리</h1>
+              <h1 className="text-base font-bold">결제관리 · 결제 단계 관리</h1>
               <p className="text-xs text-muted-foreground">
                 업체 관리자 · 계약금/중도금/잔금 단계 및 입금 확인
               </p>

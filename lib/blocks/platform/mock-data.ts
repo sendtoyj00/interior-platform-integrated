@@ -1,4 +1,5 @@
 // 목업 데이터 (실제 API 연동 없음)
+import { MENU_LABEL } from "@/lib/menu-labels"
 
 export type StageKey = "contract" | "demolition" | "framing" | "finishing" | "handover"
 
@@ -45,12 +46,14 @@ export const SUMMARY = {
 }
 
 export const NAV = [
-  { key: "dashboard", label: "대시보드" },
-  { key: "process", label: "공정 관리" },
-  { key: "quotes", label: "견적 관리" },
-  { key: "inquiries", label: "문의 관리" },
-  { key: "billing", label: "결제·정산" },
-  { key: "settings", label: "설정" },
+  { key: "dashboard", label: MENU_LABEL.dashboard },
+  { key: "inquiries", label: MENU_LABEL.inquiry },
+  { key: "quotes", label: MENU_LABEL.quote },
+  { key: "contract", label: MENU_LABEL.contract },
+  { key: "process", label: MENU_LABEL.process },
+  { key: "payment", label: MENU_LABEL.payment },
+  { key: "notification", label: MENU_LABEL.notification },
+  { key: "company", label: MENU_LABEL.company },
 ]
 
 export function stageLabel(key: StageKey) {
@@ -62,11 +65,11 @@ export function stageLabel(key: StageKey) {
 export type TabKey = "quote" | "contract" | "process" | "payment" | "photo"
 
 export const CUSTOMER_TABS: { key: TabKey; label: string; scr: string }[] = [
-  { key: "quote", label: "견적", scr: "SCR-QUOTE-002" },
-  { key: "contract", label: "계약", scr: "SCR-CONT-001" },
-  { key: "process", label: "공정", scr: "SCR-PROC-001" },
-  { key: "payment", label: "결제", scr: "SCR-PAY-002" },
-  { key: "photo", label: "사진", scr: "SCR-PROC-002" },
+  { key: "quote", label: MENU_LABEL.quote, scr: "SCR-QUOTE-002" },
+  { key: "contract", label: MENU_LABEL.contract, scr: "SCR-CONT-001" },
+  { key: "process", label: MENU_LABEL.process, scr: "SCR-PROC-001" },
+  { key: "payment", label: MENU_LABEL.payment, scr: "SCR-PAY-002" },
+  { key: "photo", label: MENU_LABEL.photo, scr: "SCR-PROC-002" },
 ]
 
 export const CUSTOMER_PROJECT = {

@@ -23,7 +23,7 @@ export type CategoryKey = "AUTH" | "COMP" | "INQ" | "QUOTE" | "CONT" | "PROC" | 
 export const CATEGORY_LABEL: Record<CategoryKey, string> = {
   AUTH: "인증/계정관리",
   COMP: "업체관리",
-  INQ: "고객문의관리",
+  INQ: "문의관리",
   QUOTE: "견적관리",
   CONT: "계약관리",
   PROC: "시공관리",

@@ -8,6 +8,7 @@ import {
   type Staff,
   type StaffStatus,
 } from "@/lib/blocks/admin/staff-data"
+import { COMPANY_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
 /* ============================================================
    와이어프레임 공용 요소 (다른 화면과 동일 패턴)
@@ -44,19 +45,17 @@ function StatusBadge({ status }: { status: StaffStatus }) {
   )
 }
 
-const MENU = [
-  { label: "대시보드", id: "SCR-DASH", on: false },
-  { label: "현장담당자 관리", id: "SCR-STAFF-001", on: true },
-  { label: "프로젝트 관리", id: "SCR-PRJ", on: false },
-  { label: "견적/계약", id: "SCR-EST", on: false },
-  { label: "업체 프로필", id: "SCR-PROF", on: false },
-]
+const MENU = [...COMPANY_MENU, MENU_LABEL.staff].map((label) => ({
+  label,
+  id: label === MENU_LABEL.staff ? "SCR-COMP-002" : `MENU-${label}`,
+  on: label === MENU_LABEL.staff,
+}))
 
 function Sidebar() {
   return (
     <nav className="flex h-full w-52 shrink-0 flex-col border-r border-neutral-300 bg-white">
       <p className="border-b border-neutral-200 px-3 py-2 font-mono text-[11px] text-neutral-400">
-        업체관리자 메뉴
+        업체 관리자 · 플랫폼 메뉴
       </p>
       <ul className="flex flex-col">
         {MENU.map((m) => (
@@ -268,7 +267,7 @@ export function StaffScreen({ mode }: { mode: "desktop" | "mobile" }) {
         <main className="min-w-0 flex-1 overflow-auto p-4">
           <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h1 className="text-sm font-bold text-neutral-800">현장담당자 관리</h1>
+              <h1 className="text-sm font-bold text-neutral-800">직원관리 · 현장 담당자</h1>
               <p className="font-mono text-[11px] text-neutral-500">SCR-STAFF-001 · REQ-NFR-002</p>
             </div>
             {/* ① 직원 초대 버튼 (상단 우측) */}

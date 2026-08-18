@@ -13,6 +13,7 @@ import {
   type Role,
   type QuoteHistoryItem,
 } from "@/lib/blocks/dealflow/mock-data"
+import { COMPANY_MENU, CUSTOMER_MENU } from "@/lib/menu-labels"
 
 const STATUS_LABEL: Record<QuoteStatus, string> = {
   pending: "승인 대기",
@@ -20,8 +21,8 @@ const STATUS_LABEL: Record<QuoteStatus, string> = {
   rejected: "거절",
 }
 
-const CUSTOMER_MENU = ["대시보드", "내 견적서", "계약 관리", "메시지", "설정"]
-const ADMIN_MENU = ["대시보드", "견적 관리", "고객 관리", "수정이력", "설정"]
+const QUOTE_CUSTOMER_MENU = CUSTOMER_MENU
+const ADMIN_MENU = COMPANY_MENU
 
 function StatusBadge({ status }: { status: QuoteStatus }) {
   return (
@@ -80,7 +81,7 @@ export function QuoteApprovalScreen({
     fireToast("거절 처리되었습니다. 업체측에 알림이 전송되었습니다.", "상태: 거절 · 업체 알림 전송됨")
   }
 
-  const menu = isAdmin ? ADMIN_MENU : CUSTOMER_MENU
+  const menu = isAdmin ? ADMIN_MENU : QUOTE_CUSTOMER_MENU
   const isClosed = status !== "pending"
 
   return (

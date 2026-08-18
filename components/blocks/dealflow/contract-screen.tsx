@@ -14,8 +14,9 @@ import {
   type ContractStatus,
   type ContractHistoryItem,
 } from "@/lib/blocks/dealflow/mock-data"
+import { COMPANY_MENU } from "@/lib/menu-labels"
 
-const ADMIN_MENU = ["대시보드", "견적 관리", "계약 관리", "고객 관리", "설정"]
+const ADMIN_MENU = COMPANY_MENU
 
 const STATUS_ORDER: ContractStatus[] = ["waiting", "signed", "completed"]
 

@@ -13,8 +13,9 @@ import {
   type ProcessStep,
   type ProcessStatus,
 } from "@/lib/blocks/dealflow/mock-data"
+import { MENU_LABEL } from "@/lib/menu-labels"
 
-const FIELD_MENU = ["대시보드", "내 현장", "공정 관리", "사진첩", "설정"]
+const FIELD_MENU = [MENU_LABEL.dashboard, MENU_LABEL.process, MENU_LABEL.photo, MENU_LABEL.settings]
 
 function ProcessStatusBadge({ status }: { status: ProcessStatus }) {
   return (
@@ -408,7 +409,7 @@ export function ProcessScreen({ variant }: { variant: "desktop" | "mobile" }) {
         <main className="min-w-0 flex-1 overflow-auto p-4">
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <div>
-              <h1 className="text-base font-bold">현장 공정 관리</h1>
+              <h1 className="text-base font-bold">시공관리 · 공정 관리</h1>
               <p className="text-xs text-neutral-500">우리집 인테리어 · 착공일 {projectStartDate}</p>
             </div>
             {/* ① 공정 템플릿 적용 버튼 */}

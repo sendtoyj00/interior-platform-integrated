@@ -3,6 +3,7 @@
 import { Num } from "@/components/blocks/ops/num"
 import { PaymentHistoryCard } from "@/components/blocks/ops/payment-history-card"
 import { INITIAL_MILESTONES, type Milestone } from "@/lib/blocks/ops/payment-mock"
+import { COMPANY_MENU, CUSTOMER_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
 type Device = "desktop" | "mobile"
 type Embed = "customer" | "company"
@@ -55,11 +56,8 @@ export function PaymentHistoryApp({
               메뉴
             </p>
             <nav className="flex flex-col gap-1 text-xs">
-              {(embed === "customer"
-                ? ["시공 사진", "결제 이력", "1:1 문의", "내 정보"]
-                : ["대시보드", "결제 관리", "결제 이력", "고객 관리"]
-              ).map((label) => {
-                const active = label === "결제 이력"
+              {(embed === "customer" ? CUSTOMER_MENU : COMPANY_MENU).map((label) => {
+                const active = label === MENU_LABEL.payment
                 return (
                   <span
                     key={label}
@@ -82,7 +80,7 @@ export function PaymentHistoryApp({
         <main className="min-w-0 flex-1 p-4">
           <div className="mb-3">
             <p className="text-sm font-bold">
-              {embed === "customer" ? "내 결제 현황" : "고객 결제 현황 (읽기)"}
+              {embed === "customer" ? "결제관리 · 내 결제 현황" : "결제관리 · 고객 결제 현황 (읽기)"}
             </p>
             <p className="text-[11px] text-muted-foreground">
               아래 카드는 마이페이지·대시보드 공용 임베드 컴포넌트입니다.
