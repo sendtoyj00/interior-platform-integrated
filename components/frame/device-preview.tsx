@@ -12,6 +12,10 @@ const DESKTOP_W = 1920
 const DESKTOP_H = 1080
 const MOBILE_W = 360
 const MOBILE_H = 800
+// CAPTURE_MODE: temporarily let frames grow to fit their full content (instead
+// of a fixed viewport height with overflow) so batch screenshots for the 화면
+// 설계서 PDF never clip a button below the fold. Revert to false before shipping.
+const CAPTURE_MODE = false
 
 export function DesktopPreview({
   children,
@@ -26,12 +30,17 @@ export function DesktopPreview({
     <div className="inline-flex flex-col gap-2">
       <div
         className="wireframe-preview overflow-hidden rounded-lg border-2 border-foreground/70 bg-background shadow-sm"
-        style={{ width: DESKTOP_W * scale, height: (DESKTOP_H + 40) * scale }}
+        style={
+          CAPTURE_MODE
+            ? { width: DESKTOP_W * scale, minHeight: (DESKTOP_H + 40) * scale, height: "auto" }
+            : { width: DESKTOP_W * scale, height: (DESKTOP_H + 40) * scale }
+        }
       >
         <div
           style={{
             width: DESKTOP_W,
-            height: DESKTOP_H + 40,
+            height: CAPTURE_MODE ? "auto" : DESKTOP_H + 40,
+            minHeight: CAPTURE_MODE ? DESKTOP_H + 40 : undefined,
             transform: `scale(${scale})`,
             transformOrigin: "top left",
           }}
@@ -45,7 +54,10 @@ export function DesktopPreview({
             </span>
             <span className="border border-foreground px-2 py-1 font-mono text-[10px] font-bold text-foreground">와이어프레임</span>
           </div>
-          <div style={{ height: DESKTOP_H }} className="relative overflow-hidden bg-background">
+          <div
+            style={{ height: CAPTURE_MODE ? "auto" : DESKTOP_H, minHeight: CAPTURE_MODE ? DESKTOP_H : undefined }}
+            className={`relative bg-background ${CAPTURE_MODE ? "overflow-visible" : "overflow-y-auto"}`}
+          >
             {children}
           </div>
         </div>
@@ -59,12 +71,23 @@ export function MobilePreview({ children }: { children: ReactNode }) {
     <div className="inline-flex flex-col gap-2">
       <div
         className="wireframe-preview overflow-hidden rounded-[2rem] border-4 border-foreground/80 bg-background shadow-sm"
-        style={{ width: MOBILE_W + 8, height: MOBILE_H + 8 }}
+        style={
+          CAPTURE_MODE
+            ? { width: MOBILE_W + 8, minHeight: MOBILE_H + 8, height: "auto" }
+            : { width: MOBILE_W + 8, height: MOBILE_H + 8 }
+        }
       >
         <div className="flex items-center justify-center border-b border-foreground/20 bg-muted py-2">
           <span className="h-1.5 w-16 rounded-full bg-foreground/30" />
         </div>
-        <div style={{ width: MOBILE_W, height: MOBILE_H }} className="relative overflow-hidden bg-background">
+        <div
+          style={{
+            width: MOBILE_W,
+            height: CAPTURE_MODE ? "auto" : MOBILE_H,
+            minHeight: CAPTURE_MODE ? MOBILE_H : undefined,
+          }}
+          className={`relative bg-background ${CAPTURE_MODE ? "overflow-visible" : "overflow-y-auto"}`}
+        >
           {children}
         </div>
       </div>

@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>인테리어 견적·시공관리 업무 플랫폼 — 화면 설계서</title>
+<style>
+  @page { size: A4; margin: 18mm 15mm 16mm 15mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Apple SD Gothic Neo", "Malgun Gothic", "Pretendard", -apple-system, sans-serif;
+    color: #111; font-size: 11.5px; line-height: 1.55; margin: 0;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  h1, h2, h3, h4 { font-weight: 800; letter-spacing: -0.01em; }
+  .cover { min-height: 250mm; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always; }
+  .cover .kicker { font-family: monospace; font-size: 12px; letter-spacing: 0.15em; color: #555; text-transform: uppercase; }
+  .cover h1 { font-size: 34px; margin: 14px 0 6px; }
+  .cover .subtitle { font-size: 15px; color: #333; margin-bottom: 30px; }
+  .cover table.meta { border-collapse: collapse; width: 100%; max-width: 480px; }
+  .cover table.meta td { border: 1px solid #999; padding: 7px 12px; font-size: 12.5px; }
+  .cover table.meta td.k { background: #111; color: #fff; font-weight: 700; width: 130px; }
+  .cover .footer-note { font-size: 11px; color: #666; border-top: 1px solid #ccc; padding-top: 10px; }
+
+  .toc { page-break-after: always; }
+  .toc h2 { font-size: 20px; border-bottom: 3px solid #111; padding-bottom: 8px; }
+  .toc ol { font-size: 13px; line-height: 2.1; padding-left: 22px; }
+  .toc ol > li { font-weight: 700; }
+  .toc ol ol { font-weight: 400; font-size: 12px; padding-left: 20px; line-height: 1.7; }
+
+  section.doc-section { page-break-before: always; }
+  section.doc-section:first-of-type { page-break-before: auto; }
+  h2.sec-title {
+    font-size: 19px; background: #111; color: #fff; padding: 8px 14px; margin: 0 0 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2.sec-title .num { font-family: monospace; border: 1px solid #fff; padding: 1px 8px; font-size: 13px; }
+  h3.sub-title { font-size: 14.5px; border-left: 5px solid #111; padding-left: 10px; margin: 22px 0 8px; }
+  p.lead { color: #333; margin: 0 0 14px; }
+
+  table.spec { border-collapse: collapse; width: 100%; margin: 10px 0 18px; font-size: 10.8px; }
+  table.spec th, table.spec td { border: 1px solid #999; padding: 5px 7px; text-align: left; vertical-align: top; }
+  table.spec th { background: #ededed; font-weight: 700; }
+  table.spec td.center { text-align: center; }
+  table.spec tr.happy td.tag { color: #111; font-weight: 700; }
+  table.spec tr.edge td.tag { color: #111; font-weight: 700; background: #e4e4e4; }
+  .tag-badge { display: inline-block; font-size: 9.5px; font-weight: 800; padding: 1px 6px; border-radius: 3px; border: 1px solid #111; }
+  .tag-badge.happy { background: #111; color: #fff; }
+  .tag-badge.edge { background: #fff; color: #111; }
+
+  .badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+  .badge { font-family: monospace; font-size: 10.5px; border: 1px solid #333; padding: 2px 8px; border-radius: 3px; }
+  .badge.solid { background: #111; color: #fff; font-weight: 700; border-color: #111; }
+  .badge.dashed { border-style: dashed; color: #555; }
+
+  .callout { border: 1px solid #999; border-left: 5px solid #111; background: #f7f7f7; padding: 8px 12px; margin: 10px 0; font-size: 11px; }
+  .callout.warn { border-left-color: #444; background: #efefef; }
+  ul.plain, ol.plain { margin: 6px 0 14px; padding-left: 20px; }
+  ul.plain li, ol.plain li { margin-bottom: 3px; }
+
+  .screen-block { page-break-before: always; border-top: 3px double #111; padding-top: 10px; }
+  .screen-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 6px; }
+  .screen-head h3 { font-size: 17px; margin: 0; }
+  .screen-meta-table { border-collapse: collapse; margin: 8px 0 12px; font-size: 10.8px; }
+  .screen-meta-table td { border: 1px solid #999; padding: 4px 9px; }
+  .screen-meta-table td.k { background: #ededed; font-weight: 700; white-space: nowrap; }
+  figure.wf { margin: 12px 0; text-align: center; }
+  figure.wf img { max-width: 100%; border: 1px solid #999; }
+  figure.wf figcaption { font-size: 10px; color: #666; margin-top: 4px; font-family: monospace; }
+
+  table.matrix { border-collapse: collapse; width: 100%; font-size: 10px; margin: 10px 0 20px; }
+  table.matrix th, table.matrix td { border: 1px solid #999; padding: 4px 6px; }
+  table.matrix th { background: #ededed; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 12px 0 18px; }
+  .cat-card { border: 1px solid #999; padding: 8px 10px; }
+  .cat-card .cat-name { font-weight: 800; font-size: 11.5px; }
+  .cat-card .cat-count { font-size: 20px; font-weight: 800; margin: 2px 0; }
+  .cat-card .cat-ids { font-family: monospace; font-size: 9px; color: #555; }
+
+  footer.page-footer { font-size: 9px; color: #999; text-align: center; margin-top: 30px; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<div class="cover">
+  <div>
+    <div class="kicker">Screen Design Specification</div>
+    <h1>인테리어 견적·시공관리 업무 플랫폼<br>화면 설계서</h1>
+    <div class="subtitle">전체 20개 화면(SCR-*) 와이어프레임 및 인터랙션·로직 정의서</div>
+    <table class="meta">
+      <tr><td class="k">프로젝트명</td><td>인테리어 견적·시공관리 업무 플랫폼</td></tr>
+      <tr><td class="k">문서명</td><td>화면 설계서 (Screen Design Specification)</td></tr>
+      <tr><td class="k">작성자</td><td>정예지</td></tr>
+      <tr><td class="k">작성일자</td><td>2026-08-19</td></tr>
+      <tr><td class="k">최종수정일</td><td>2026-08-19</td></tr>
+      <tr><td class="k">문서 버전</td><td>v1.0</td></tr>
+      <tr><td class="k">연계 문서</td><td>요구사항 정의서 v1.1 (2026-08-18)</td></tr>
+      <tr><td class="k">관련 과정</td><td>SKALA 웹 서비스 개발 Mini Project</td></tr>
+      <tr><td class="k">구현 소스</td><td>Next.js 그레이스케일 와이어프레임 프로토타입 (전체 20화면 통합 리포지토리)</td></tr>
+    </table>
+  </div>
+  <div class="footer-note">
+    본 문서의 모든 와이어프레임 이미지는 실제 구동 중인 프로토타입(npm run dev, http://localhost:3000)을 헤드리스 브라우저로 렌더링하여 캡처한 스크린샷입니다.
+    데스크톱(1920×1080)·모바일(360×800) 프레임을 화면마다 동시에 제공하며, 모든 상호작용 요소에는 번호 배지(①②③…)를 부여하고 우측/하단 디스크립션 표에서 각 요소의 인터랙션·로직·이동화면·매핑 요구사항ID를 정의합니다.
+  </div>
+</div>
+
+<!-- ============ TOC ============ -->
+<div class="toc">
+  <h2>목차</h2>
+  <ol>
+    <li>표지 및 문서 정보 (Cover &amp; Meta Data)</li>
+    <li>개정 이력 (Revision History)</li>
+    <li>서비스 개요 및 정보 구조도 (IA &amp; User Flow)
+      <ol>
+        <li>서비스 개요</li>
+        <li>정보 구조도(IA) — 카테고리별 화면 트리</li>
+        <li>사용자 흐름(User Flow) — 화면 간 이동 그래프</li>
+      </ol>
+    </li>
+    <li>공통 정책 및 규칙 (Global Policy &amp; System Rules)</li>
+    <li>상세 화면 설계 (Detailed Screen Specification) — 전체 20개 화면
+      <ol>
+        <li>인증/계정관리 — SCR-AUTH-001~005</li>
+        <li>업체관리 — SCR-COMP-001~002</li>
+        <li>고객문의관리 — SCR-INQ-001~002</li>
+        <li>견적관리 — SCR-QUOTE-001~002</li>
+        <li>계약관리 — SCR-CONT-001</li>
+        <li>시공관리 — SCR-PROC-001~002</li>
+        <li>결제관리 — SCR-PAY-001~002</li>
+        <li>알림관리 — SCR-NOTI-001</li>
+        <li>대시보드 — SCR-DASH-001~002</li>
+        <li>확장검토(AI연계) — SCR-EXT-001</li>
+      </ol>
+    </li>
+    <li>부록 및 예외 케이스 (Appendix &amp; Exceptions)
+      <ol>
+        <li>Happy Path / Edge Case 표기 규칙</li>
+        <li>화면 × 요구사항 추적성 매트릭스</li>
+        <li>보안 요구사항 이중검증 체크리스트 (프론트/백엔드)</li>
+        <li>제외·보류된 요구사항 근거</li>
+        <li>용어 정의</li>
+      </ol>
+    </li>
+  </ol>
+</div>
+
+<!-- ============ 1. COVER & META (restated as section) ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">01</span> 표지 및 문서 정보 (Cover &amp; Meta Data)</h2>
+
+  <h3 class="sub-title">1.1 문서 기본 정보</h3>
+  <table class="spec">
+    <tr><th style="width:150px">항목</th><td>내용</td></tr>
+    <tr><td>프로젝트명</td><td>인테리어 견적·시공관리 업무 플랫폼 (중립형 B2B2C 업무 플랫폼)</td></tr>
+    <tr><td>문서명</td><td>화면 설계서 (Screen Design Specification, 와이어프레임 + 인터랙션 정의)</td></tr>
+    <tr><td>작성자 / 작성일 / 최종수정일 / 버전</td><td>정예지 / 2026-08-19 / 2026-08-19 / v1.0</td></tr>
+    <tr><td>연계 문서</td><td>요구사항 정의서 v1.1 (2026-08-18, 정예지) — 요구사항ID(REQ-*)·기능ID(FUNC-*)·화면ID(SCR-*) 체계를 그대로 상속</td></tr>
+    <tr><td>구현 소스 / 실행 방법</td><td>Next.js 16 + React 19 + Tailwind v4 (shadcn 그레이스케일 테마). <code>npm install && npm run dev</code> 후 http://localhost:3000 에서 전체 20화면 확인 가능</td></tr>
+    <tr><td>범위</td><td>요구사항 정의서 4장에 명시된 관련 화면ID(SCR-*) 전체 20개 (부록 B의 6장 카테고리 커버리지 표와 1:1 대응)</td></tr>
+  </table>
+
+  <h3 class="sub-title">1.2 화면 ID 체계 및 작성 원칙</h3>
+  <ul class="plain">
+    <li>화면 ID는 <code>SCR-{대분류코드}-{일련번호}</code> 형식을 사용하며, 요구사항 정의서의 "관련 화면 ID" 컬럼과 1:1로 매핑된다 (추적성 체계는 부록 6.2 참조).</li>
+    <li>본 문서는 그레이스케일(Grayscale) 와이어프레임 원칙을 따른다 — 컬러는 네비게이션/강조 버튼 등 최소한의 위계 표현에만 제한적으로 사용하고, 레이아웃·정보구조·UX 흐름 검증에 집중한다.</li>
+    <li>화면 내 모든 상호작용 요소(버튼·입력필드·토글·탭·테이블 행 액션)에는 번호 배지(①②③…)를 부여하고, 각 화면의 디스크립션 표에서 <b>NO / 구분(Happy Path·Edge Case) / UI 요소명 / 인터랙션 및 로직 정의 / 이동 화면·비고 / 매핑 요구사항ID</b> 6개 컬럼으로 상세 기술한다.</li>
+    <li>모든 액션 버튼은 아이콘 단독이 아닌 <b>한글 동사형 라벨을 명확히 병기</b>하여 가시성을 확보한다 (예: "가입하기", "견적서 발송", "승인", "반려", "재발송").</li>
+  </ul>
+</section>
+
+<!-- ============ 2. REVISION HISTORY ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">02</span> 개정 이력 (Revision History)</h2>
+  <p class="lead">본 화면 설계서 자체의 버전 이력이다. 요구사항 정의서의 요구사항 단위 변경이력(제외/보류 포함)은 부록 6.4에서 별도로 추적한다.</p>
+  <table class="spec">
+    <tr><th style="width:60px">버전</th><th style="width:100px">개정일</th><th style="width:130px">대상 범위</th><th>변경 내용</th><th style="width:110px">작성/검토자</th></tr>
+    <tr>
+      <td>v1.0</td><td>2026-08-19</td><td>전체 (SCR-AUTH-001 ~ SCR-EXT-001, 20개 화면)</td>
+      <td>요구사항 정의서 v1.1을 기준으로 화면 설계서 최초 작성. 실제 구동 중인 Next.js 그레이스케일 와이어프레임 프로토타입을 헤드리스 브라우저로 렌더링·캡처하여 전 화면 데스크톱/모바일 스크린샷을 첨부하고, 화면별 디스크립션(초기상태/인터랙션·로직/예외처리/이동화면/매핑 요구사항ID)을 신규 작성함. 대시보드 카테고리는 요구사항 정의서 v1.1 변경사항(SCR-DASH-001 업체용 / SCR-DASH-002 고객용 분리)을 그대로 반영.</td>
+      <td>정예지</td>
+    </tr>
+  </table>
+  <div class="callout">
+    선행 문서인 <b>요구사항 정의서</b>는 v1.0(2026-08-18, 최초 작성) → v1.1(2026-08-18, REQ-DASH-002 관련 화면ID를 SCR-DASH-001에서 SCR-DASH-002로 분리 채번)의 개정을 거쳤으며, 본 화면 설계서는 그 최종본인 v1.1을 기준으로 작성되었다.
+  </div>
+</section>
+
+<!-- ============ 3. SERVICE OVERVIEW / IA / FLOW ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">03</span> 서비스 개요 및 정보 구조도 (IA &amp; User Flow)</h2>
+
+  <h3 class="sub-title">3.1 서비스 개요</h3>
+  <p class="lead">
+    <b>서비스명</b>: 인테리어 회사를 위한 중립형 B2B2C 업무 플랫폼<br>
+    <b>목적</b>: 인테리어 업체가 고객관리부터 견적, 계약, 시공관리, 결제, 고객 알림까지 필요한 업무 기능을 선택하여 사용하고, 고객은 업체가 공유한 프로젝트에 참여해 공사 진행 정보를 확인할 수 있는 중립형 업무 플랫폼.
+  </p>
+  <ul class="plain">
+    <li><b>업체:</b> 필요한 업무 모듈만 선택하여 반복 업무를 줄인다.</li>
+    <li><b>고객:</b> 견적·계약·공정·결제·사진 등 자신의 공사 정보를 한곳에서 확인한다.</li>
+    <li><b>플랫폼:</b> 특정 업체에 종속되지 않고 여러 업체가 독립적으로 사용할 수 있는 환경을 제공한다.</li>
+    <li><b>이해관계자(5개 역할):</b> 인테리어 업체 관리자, 현장 담당자, 인테리어 고객, 플랫폼 관리자, 외부 알림 API(비인격 주체).</li>
+  </ul>
+
+  <h3 class="sub-title">3.2 정보 구조도(IA) — 카테고리별 화면 트리 (총 20개 화면)</h3>
+  <div class="cat-grid">
+    <div class="cat-card"><div class="cat-name">AUTH 인증/계정관리</div><div class="cat-count">5</div><div class="cat-ids">001·002·003·004·005</div></div>
+    <div class="cat-card"><div class="cat-name">COMP 업체관리</div><div class="cat-count">2</div><div class="cat-ids">001·002</div></div>
+    <div class="cat-card"><div class="cat-name">INQ 고객문의관리</div><div class="cat-count">2</div><div class="cat-ids">001·002</div></div>
+    <div class="cat-card"><div class="cat-name">QUOTE 견적관리</div><div class="cat-count">2</div><div class="cat-ids">001·002</div></div>
+    <div class="cat-card"><div class="cat-name">CONT 계약관리</div><div class="cat-count">1</div><div class="cat-ids">001</div></div>
+    <div class="cat-card"><div class="cat-name">PROC 시공관리</div><div class="cat-count">2</div><div class="cat-ids">001·002</div></div>
+    <div class="cat-card"><div class="cat-name">PAY 결제관리</div><div class="cat-count">2</div><div class="cat-ids">001·002</div></div>
+    <div class="cat-card"><div class="cat-name">NOTI 알림관리</div><div class="cat-count">1</div><div class="cat-ids">001</div></div>
+    <div class="cat-card"><div class="cat-name">DASH 대시보드</div><div class="cat-count">2</div><div class="cat-ids">001(업체)·002(고객)</div></div>
+    <div class="cat-card"><div class="cat-name">EXT 확장검토(AI연계)</div><div class="cat-count">1</div><div class="cat-ids">001</div></div>
+  </div>
+  <p class="lead">메뉴 경로(depth)는 역할별로 다음과 같이 구성된다 — <code>메인 &gt; 로그인(SCR-AUTH-003)</code> 진입 후 역할에 따라 <code>업체관리자 → 대시보드(SCR-DASH-001)</code> / <code>현장담당자 → 공정관리(SCR-PROC-001)</code> / <code>고객 → 마이페이지(SCR-DASH-002)</code> / <code>플랫폼관리자 → 업체승인관리(SCR-COMP-001)</code>로 자동 분기한다.</p>
+
+  <figure class="wf">
+    <img src="assets/home.png" alt="전체 화면 통합 홈 - 카테고리별 화면 현황">
+    <figcaption>Fig 3-1. 전체 20개 화면 통합 홈 대시보드 (역할별 빠른 시작 진입점 + 카테고리별 화면 현황 카드) — http://localhost:3000</figcaption>
+  </figure>
+
+  <h3 class="sub-title">3.3 사용자 흐름(User Flow) — 화면 간 이동 그래프</h3>
+  <p class="lead">굵게 표시된 연결은 <b>실제 라우팅으로 동작</b>하는 흐름이며, 그 외 연결은 각 화면 하단 "관련 화면 바로가기" 패널을 통해 이동 가능한 <b>이동 화면(제안)</b>이다. 실제 라우팅 목록:</p>
+  <table class="spec">
+    <tr><th style="width:150px">From</th><th style="width:150px">To</th><th>트리거</th></tr>
+    <tr><td>SCR-AUTH-003 로그인</td><td>SCR-DASH-001 업체 대시보드</td><td>업체 관리자 계정으로 로그인 성공</td></tr>
+    <tr><td>SCR-AUTH-003 로그인</td><td>SCR-PROC-001 공정 관리</td><td>현장 담당자 계정으로 로그인 성공</td></tr>
+    <tr><td>SCR-AUTH-003 로그인</td><td>SCR-DASH-002 고객 마이페이지</td><td>고객 계정으로 로그인 성공</td></tr>
+    <tr><td>SCR-AUTH-003 로그인</td><td>SCR-COMP-001 업체 승인관리</td><td>플랫폼 관리자 계정으로 로그인 성공</td></tr>
+    <tr><td>SCR-INQ-002 문의 처리 관리</td><td>SCR-QUOTE-001 견적서 작성</td><td>"견적서 작성하기" 버튼 선택</td></tr>
+    <tr><td>SCR-DASH-001 업체 대시보드</td><td>SCR-PROC-001 공정 관리</td><td>프로젝트 리스트 행 클릭</td></tr>
+    <tr><td>SCR-DASH-001 업체 대시보드</td><td>SCR-INQ-002 문의 처리 관리</td><td>빈 상태의 "문의 확인하러 가기" 버튼</td></tr>
+  </table>
+
+  <figure class="wf">
+    <img src="assets/flow.png" alt="화면 간 이동 흐름도 전체">
+    <figcaption>Fig 3-2. 카테고리별 전체 화면 이동 흐름도 (실선 굵게 = 실제 라우팅, 그 외 = 이동 화면 제안) — /flow</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 4. GLOBAL POLICY ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">04</span> 공통 정책 및 규칙 (Global Policy &amp; System Rules)</h2>
+  <p class="lead">개별 화면 설계서에서 반복 기술하지 않고, 전 화면에 공통으로 적용되는 디자인·인터랙션·데이터·예외처리 규칙을 정의한다. 5장의 각 화면은 아래 공통 정책을 전제로 화면별 차이점만 기술한다.</p>
+
+  <h3 class="sub-title">4.1 디자인 시스템 / 와이어프레임 톤앤매너</h3>
+  <ul class="plain">
+    <li><b>그레이스케일 원칙:</b> 모든 화면은 컬러를 배제한 그레이스케일 와이어프레임으로 작성한다. 컬러는 네비게이션 강조·Primary 버튼 등 최소한의 위계 표현에만 제한적으로 허용한다.</li>
+    <li><b>공용 컴포넌트:</b> 전 20화면은 공용 <code>app/globals.css</code>(그레이스케일 shadcn 테마)와 공용 <code>components/ui/button.tsx</code>를 사용해 버튼·타이포·여백 톤을 통일한다.</li>
+    <li><b>디바이스 프리뷰 규격:</b> 화면마다 <b>DESKTOP(1920×1080, 브라우저 크롬 UI 포함, 0.5 스케일 미리보기)</b>과 <b>MOBILE(360×800, 기기 노치 UI 포함)</b> 두 프레임을 동시에 제공한다 (<code>components/frame/device-preview.tsx</code>). 콘텐츠가 프레임 높이를 초과하는 경우 프레임 내부 스크롤(overflow-y auto)로 처리하며, 본 문서의 캡처 이미지는 버튼 가시성 확보를 위해 프레임을 콘텐츠 높이에 맞춰 임시로 확장 렌더링한 것이다(4.2 참조).</li>
+    <li><b>번호 배지 규칙:</b> 설명이 필요한 모든 UI 요소 옆에 ①②③… 번호 배지를 부여하고, 우측/하단 디스크립션 표의 NO 컬럼과 1:1 대응시킨다.</li>
+    <li><b>화면 상단 메타 배지:</b> 모든 화면은 상단에 <span class="badge solid">SCR-ID</span> <span class="badge">카테고리</span> <span class="badge dashed">REQ-ID</span> <span class="badge">대상 역할</span> 배지와 메뉴 경로(breadcrumb), 화면 명칭을 고정 노출한다 (<code>components/frame/screen-page-chrome.tsx</code>).</li>
+  </ul>
+
+  <h3 class="sub-title">4.2 버튼 및 라벨 가시성 규칙</h3>
+  <div class="callout">
+    본 문서는 <b>"모든 버튼 이름의 가시성"</b>을 필수 요건으로 한다. 이를 위해 다음 규칙을 전 화면에 적용한다.
+  </div>
+  <ul class="plain">
+    <li>모든 액션 버튼은 아이콘 단독 사용을 지양하고 <b>한글 동사형 라벨을 명확히 병기</b>한다 (예: "가입하기", "로그인", "견적서 발송", "승인", "반려", "재발송", "상세보기").</li>
+    <li>Primary 버튼은 검정 배경 + 흰색 텍스트(또는 그 반전)로 최대 명도 대비를 확보하고, 비활성(Disabled) 상태에서도 라벨 텍스트는 항상 유지한 채 배경만 회색조로 낮춘다.</li>
+    <li>모바일 프레임처럼 세로 폭이 좁은 레이아웃에서 버튼이 프레임 하단에 가려지는 경우를 방지하기 위해, 프레임은 콘텐츠 높이에 맞춰 확장되거나(캡처 시) 스크롤 가능해야 한다(실서비스, 4.1 참조) — 실제로 본 설계서 작업 중 SCR-QUOTE-001 등 콘텐츠가 긴 화면에서 모바일 프레임 하단의 "견적서 발송" 버튼이 고정 800px 프레임에 가려지는 결함을 발견하여 <code>overflow-hidden → overflow-y-auto</code>로 수정하였다 (5장 해당 화면 각주 참조).</li>
+  </ul>
+
+  <h3 class="sub-title">4.3 역할(Role) 및 접근 제어 정책</h3>
+  <table class="spec">
+    <tr><th style="width:110px">역할</th><th>로그인 성공 시 기본 진입 화면</th><th>비고</th></tr>
+    <tr><td>비로그인(guest)</td><td>—</td><td>회원가입(SCR-AUTH-001/002)·로그인(SCR-AUTH-003)만 접근 가능</td></tr>
+    <tr><td>업체 관리자</td><td>SCR-DASH-001 업체 대시보드</td><td>문의·견적·계약·시공·결제·직원관리 전 메뉴 접근</td></tr>
+    <tr><td>현장 담당자</td><td>SCR-PROC-001 공정 관리</td><td>담당 프로젝트의 공정·사진 관리 범위로 제한</td></tr>
+    <tr><td>인테리어 고객</td><td>SCR-DASH-002 고객 마이페이지</td><td>본인 프로젝트의 견적·계약·공정·결제·사진 조회로 제한</td></tr>
+    <tr><td>플랫폼 관리자</td><td>SCR-COMP-001 업체 승인관리</td><td>업체 승인, RBAC 설정, 알림 발송이력 등 플랫폼 운영 메뉴</td></tr>
+  </table>
+  <ul class="plain">
+    <li>역할별 메뉴·버튼 노출은 프론트엔드(사이드바 필터, 조건부 렌더링)에서 1차 처리하지만, <b>최종 접근 통제는 반드시 백엔드에서 JWT 클레임을 검증</b>한다 (REQ-NFR-002, 프론트 검증만으로는 우회 가능하므로 백엔드 필수). SCR-AUTH-005(RBAC 관리 화면)는 이 정책을 설정·열람하는 프론트엔드 UI일 뿐, 실제 접근 차단 로직 자체는 아니다.</li>
+    <li>업체별 데이터는 <code>company_id</code> 기준 논리적으로 격리한다(REQ-NFR-003, 멀티테넌시) — 타 업체의 프로젝트/문의/견적 데이터는 어떤 역할로도 조회되지 않아야 한다.</li>
+  </ul>
+
+  <h3 class="sub-title">4.4 데이터 표기 및 상태값 규칙</h3>
+  <ul class="plain">
+    <li><b>금액:</b> 천단위 콤마 + "원" 접미 표기 (예: 6,745,000원).</li>
+    <li><b>날짜:</b> YYYY-MM-DD 형식, 필요 시 시각까지 YYYY-MM-DD HH:mm 표기.</li>
+    <li><b>상태값:</b> 배지(badge) 형태로 표기하며 문의(신규/상담중/견적발송/종료), 계약(계약대기/체결/완료), 결제(대기/완료) 등 열거형 상태는 임의 자유 텍스트가 아닌 고정된 상태값 집합을 사용한다.</li>
+    <li><b>필수 입력:</b> 라벨 옆에 <code>*</code>를 표기하고, 필수 항목이 모두 유효하게 입력되기 전까지 제출성 버튼(가입하기/발송/저장 등)은 비활성 상태를 유지한다.</li>
+  </ul>
+
+  <h3 class="sub-title">4.5 예외·오류 처리 공통 규칙</h3>
+  <ul class="plain">
+    <li><b>유효성 오류(Validation):</b> 필드 하단에 인라인 에러 메시지로 표시한다 (예: "이메일 또는 비밀번호가 올바르지 않습니다").</li>
+    <li><b>시스템 오류:</b> 네트워크 미연결·서버 500 오류 등은 공통 토스트 메시지로 노출한다.</li>
+    <li><b>비인가 접근:</b> 역할 권한이 없는 화면 진입 시 안내 문구와 함께 로그인 화면 또는 역할 홈으로 리다이렉트한다.</li>
+    <li><b>보안 관련 요구사항</b>은 프론트엔드 1차 검증 + 백엔드 최종 검증을 모두 충족해야 완료로 간주하며, 백엔드 검증이 누락된 경우 해당 요구사항은 미충족으로 처리한다 (요구사항 정의서 부록 A, 본 문서 부록 6.3에 재게재).</li>
+  </ul>
+
+  <h3 class="sub-title">4.6 문서·추적성 관리 규칙</h3>
+  <ul class="plain">
+    <li>화면ID(<code>SCR-{대분류}-{일련번호}</code>)와 요구사항ID(<code>REQ-{대분류}-{일련번호}</code>)는 항상 1:1 이상으로 교차 참조되며, 5장 각 화면의 "매핑 요구사항ID" 컬럼과 요구사항 정의서 4장의 "관련 화면 ID" 컬럼이 서로의 역참조가 된다 (추적성 매트릭스는 부록 6.2).</li>
+    <li>문서 개정 시 버전과 변경이력 표(2장)를 함께 갱신한다(REQ-NFR-008).</li>
+  </ul>
+</section>
+
+<!-- ============ 5. DETAILED SCREEN SPECIFICATION ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">05</span> 상세 화면 설계 (Detailed Screen Specification)</h2>
+  <p class="lead">전체 20개 화면을 요구사항 정의서 4장의 카테고리 순서(인증/계정관리 → 업체관리 → 고객문의관리 → 견적관리 → 계약관리 → 시공관리 → 결제관리 → 알림관리 → 대시보드 → 확장검토)대로 기술한다. 각 화면은 <b>기본정보 → 초기 상태 → 와이어프레임(데스크톱/모바일 스크린샷) → 디스크립션(Happy Path/Edge Case 구분) → 예외 처리 및 정책 → 관련 화면</b> 순서로 구성된다.</p>
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.1 인증/계정관리 (SCR-AUTH-001 ~ 005)</h3>
+  <!-- SCR-AUTH-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-AUTH-001</span>
+          <span class="badge">인증/계정관리</span>
+          <span class="badge dashed">REQ-AUTH-001 · FUNC-AUTH-001-01</span>
+          <span class="badge">비로그인</span>
+        </div>
+        <h3>업체 관리자 회원가입</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 회원가입 &gt; 업체 — 사업자정보(상호명·사업자등록번호·연락처) 입력 후 이메일 인증, 인증 완료 시 플랫폼 관리자 승인대기 상태로 전환되는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>폼 단계(step=form)로 진입하며 상호명·사업자등록번호·연락처·이메일·비밀번호·비밀번호 확인 필드는 모두 공란, 업체 로고는 미첨부, 소개글은 0/300자로 표시된다.</li>
+      <li>안내 문구 "필수 항목(*)을 모두 입력하면 가입하기 버튼이 활성화됩니다"가 상단에 고정 노출된다.</li>
+      <li>⑧ "가입하기" 버튼은 회색 비활성 상태(<code>disabled</code>)로 시작하며, 상호명·사업자등록번호(10자리)·연락처(10자리 이상)·이메일 형식·비밀번호 일치가 모두 충족될 때만 검정 활성 버튼으로 전환된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-auth-001.png" alt="SCR-AUTH-001 업체 관리자 회원가입 와이어프레임">
+      <figcaption>SCR-AUTH-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:110px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상호명 입력</td><td>필수 텍스트 필드(placeholder "상호명을 입력하세요"). 공란이면 가입하기 비활성 조건에 포함.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>사업자등록번호 입력</td><td>숫자만 입력받아 000-00-00000 형식으로 자동 하이픈 포맷팅(최대 10자리). 10자리 완성 시 유효로 판정.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>사업자등록번호 검증</td><td>입력 후 포커스 아웃(blur) 시 10자리 미만이면 "사업자등록번호는 10자리 숫자여야 합니다 (000-00-00000)" 인라인 오류 노출(요구사항 "사업자번호 형식 검증" 반영). 제출 시 값이 <code>123-45-67890</code>(목업 중복값)이면 "이미 등록된 정보입니다" 오류로 폼으로 되돌아감.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>담당자 연락처 입력</td><td>010-0000-0000 형식으로 자동 하이픈 포맷팅.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>이메일 입력</td><td>이메일 정규식 검증 통과 시 유효. placeholder "manager@company.com".</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>이메일 중복/오류</td><td>제출 시 값이 <code>dup@test.com</code>이면 "이미 등록된 정보입니다" 표시. 값에 "error" 포함 시 네트워크 오류 토스트("네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요")와 함께 폼으로 복귀.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>비밀번호 / 비밀번호 확인</td><td>두 입력값이 1자 이상이고 서로 일치해야 유효. 각 입력창 우측 눈 아이콘 버튼(아이콘 전용, 보조 컨트롤)으로 평문/마스킹 토글.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="edge"><td class="center">⑤'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>비밀번호 불일치</td><td>확인 필드에서 blur 시 두 값이 다르면 "비밀번호가 일치하지 않습니다" 오류 노출.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[이미지 선택] 버튼</td><td>선택 항목. 클릭 시 파일 선택창 오픈, 이미지 선택 시 좌측 미리보기 박스에 즉시 반영. 첨부 후 [제거] 버튼 노출.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>업체 소개글</td><td>선택 항목, 최대 300자 textarea. 하단에 "n / 300" 글자수 카운터 실시간 표시.</td><td>-</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑧</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[가입하기] 버튼</td><td>①~⑤ 필수값이 모두 유효할 때만 활성화(검정 배경/흰 텍스트). 클릭 시 "가입 처리 중..." 로딩 화면(1.5초 목업 지연) → 이메일 인증 발송 화면으로 전환.</td><td>이메일 인증 단계</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑨</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[이메일 인증 완료 (목업)] 버튼</td><td>이메일 인증 메일 발송 안내 화면에서 클릭 시 승인 대기 화면으로 전환(실제로는 사용자가 메일함에서 링크 클릭).</td><td>승인 대기 단계</td><td>FUNC-AUTH-001-01</td></tr>
+      <tr class="happy"><td class="center">⑩</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[로그인 화면으로 이동 (SCR-AUTH-003)] 버튼</td><td>승인 대기 안내("관리자 승인이 완료되기 전까지는 로그인할 수 없습니다") 화면에서 클릭 시 로그인 화면 이동 안내 토스트 노출 후 폼 초기화(목업).</td><td>SCR-AUTH-003</td><td>FUNC-AUTH-001-01</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>사업자등록번호 형식 오류</b>: 10자리 미만 시 인라인 오류. 실제 사업자번호 유효성(국세청 진위확인 API 등)은 코드상 미구현 — 요구사항 기준 백엔드 추가 구현 필요.</li>
+      <li><b>중복 가입</b>: 이메일 또는 사업자등록번호가 이미 등록된 경우 각각 "이미 등록된 정보입니다" 인라인 오류.</li>
+      <li><b>시스템 오류</b>: 네트워크 오류 시 공통 토스트로 안내 후 재시도 가능.</li>
+      <li><b>승인 대기</b>: 이메일 인증 완료 후에도 플랫폼 관리자 승인 전에는 로그인이 차단됨을 명시적으로 안내.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-AUTH-003(로그인) — 승인 대기 안내 화면에서 로그인 화면으로 이동 유도.</p>
+  </div>
+  <!-- /SCR-AUTH-001 -->
+  <!-- SCR-AUTH-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-AUTH-002</span>
+          <span class="badge">인증/계정관리</span>
+          <span class="badge dashed">REQ-AUTH-001 · FUNC-AUTH-001-02</span>
+          <span class="badge">비로그인</span>
+        </div>
+        <h3>고객 회원가입</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 회원가입 &gt; 고객 — 이메일/휴대폰 기반 간편가입, 이메일 인증 후 별도 승인 없이 즉시 계정이 활성화되는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>연락 채널 탭은 "이메일"이 기본 선택. 이름·이메일·비밀번호·비밀번호확인·주소는 공란, 약관은 전체 미동의 상태.</li>
+      <li>안내 문구 "필수 항목(①②③⑤)을 완료하면 가입하기 버튼이 활성화됩니다"가 상단에 노출된다.</li>
+      <li>⑥ "가입하기" 버튼은 이름·연락채널 인증·비밀번호 일치·필수 약관 동의가 모두 충족될 때까지 비활성.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-auth-002.png" alt="SCR-AUTH-002 고객 회원가입 와이어프레임">
+      <figcaption>SCR-AUTH-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:110px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>이름 입력</td><td>필수 텍스트 필드.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>이메일/휴대폰 채널 탭</td><td>"이메일" / "휴대폰번호" 탭 전환(선택된 탭은 검정 배경). 이메일 채널은 [인증번호 발송]→[확인] 절차, 휴대폰 채널은 형식 검증(10자리 이상)만으로 유효 처리.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[인증번호 발송] / [재발송] 버튼</td><td>이메일 형식 유효 시 인증번호 발송(목업 코드 123456), 180초 타이머 시작. 이미 발송했다면 라벨이 "재발송"으로 바뀜.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="edge"><td class="center">⑦'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>이메일 검증 실패</td><td>형식 오류 시 "올바른 이메일 형식을 입력하세요", 중복 이메일(dup@test.com) 시 "이미 등록된 정보입니다".</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">⑧</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>인증번호 입력 + [확인] 버튼</td><td>6자리 숫자 입력, 목업 정답 123456 입력 후 [확인] 클릭 시 "✓ 이메일 인증 완료" 표시로 전환.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="edge"><td class="center">⑧'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>인증번호 오류/만료</td><td>오답 시 "인증번호가 일치하지 않습니다 (n/3회)", 3회 초과 시 "3회 잘못 입력했습니다. [재발송] 후 다시 시도"로 [확인] 버튼 비활성화. 180초 타이머 만료 시 "인증 시간이 만료되었습니다. [재발송] 해주세요" 안내와 함께 [확인] 비활성화.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>비밀번호 / 비밀번호 확인</td><td>1자 이상 입력 + 두 값 일치 시 유효. 우측 눈 아이콘으로 마스킹 토글(보조 컨트롤).</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>비밀번호 불일치</td><td>확인 필드 blur 시 불일치하면 "비밀번호가 일치하지 않습니다" 오류.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>주소 (선택) / [나중에 입력하기]</td><td>선택 항목. "나중에 입력하기" 클릭 시 입력값 초기화 후 필드 비활성(placeholder "가입 후 마이페이지에서 입력할 수 있습니다"), 다시 누르면 "지금 입력하기"로 라벨 전환.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>약관 동의 (전체동의 + 개별 4항목)</td><td>전체동의 체크박스는 4개 항목을 일괄 토글. 각 항목 우측 화살표로 상세 아코디언 펼침. 만14세 이상/이용약관/개인정보 3개는 필수, 마케팅 수신은 선택.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="edge"><td class="center">⑤'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>필수 약관 미동의</td><td>필수 3항목 중 하나라도 미동의 시 "[필수] 약관에 모두 동의해야 가입할 수 있습니다" 안내, 가입하기 비활성 유지.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[가입하기] 버튼</td><td>①③⑤ 및 채널별 인증이 모두 유효할 때 활성화. 클릭 시 "가입 처리 중..." 로딩(1.5초 목업) 후 즉시 "가입이 완료되었습니다" 완료 화면 표시(승인 절차 없음).</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="edge"><td class="center">⑥'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>휴대폰 중복 가입</td><td>휴대폰 채널 값이 010-1234-5678(목업 중복값)이면 제출 시 "이미 등록된 정보입니다" 오류로 폼 복귀.</td><td>-</td><td>FUNC-AUTH-001-02</td></tr>
+      <tr class="happy"><td class="center">⑨</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[로그인 화면으로 이동 (SCR-AUTH-003)] 버튼</td><td>가입완료 화면에서 클릭 시 이동 안내 토스트 후 폼 초기화(목업). 완료 후 400ms 뒤 자동으로도 동일 토스트 노출.</td><td>SCR-AUTH-003</td><td>FUNC-AUTH-001-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>인증번호 오류/만료</b>: 3회 오답 또는 180초 타이머 만료 시 [재발송] 유도, 확인 버튼 비활성화.</li>
+      <li><b>중복 가입</b>: 이메일/휴대폰 각각 목업 중복값에 대해 "이미 등록된 정보입니다" 처리.</li>
+      <li><b>필수 약관 미동의</b>: 가입하기 비활성 상태 유지로 차단.</li>
+      <li>업체 가입(SCR-AUTH-001)과 달리 <b>승인 대기 절차 없이 즉시 활성화</b>되는 점이 핵심 차이 — 요구사항 REQ-AUTH-001-02의 "즉시 활성화" 조건과 일치.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-AUTH-003(로그인) — 가입 완료 후 로그인 화면으로 이동.</p>
+  </div>
+  <!-- /SCR-AUTH-002 -->
+  <!-- SCR-AUTH-003 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-AUTH-003</span>
+          <span class="badge">인증/계정관리</span>
+          <span class="badge dashed">REQ-AUTH-002 · FUNC-AUTH-002-01/02</span>
+          <span class="badge">전체 사용자 공용</span>
+        </div>
+        <h3>로그인 / 로그아웃</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 로그인 — 전체 사용자 공용 로그인 화면. 인증 성공 시 역할에 따라 기본 화면으로 <b>실제 라우팅</b>되는 5개 화면 중 하나</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>이메일·비밀번호 공란, "로그인 상태 유지" 미체크. ④ [로그인] 버튼은 이메일 형식+비밀번호 1자 이상 조건을 만족하기 전까지 비활성.</li>
+      <li>목업 계정 안내 박스가 하단에 노출된다 (company@test.com / field@test.com / customer@test.com / admin@test.com, 공통 비밀번호 1234).</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-auth-003.png" alt="SCR-AUTH-003 로그인/로그아웃 와이어프레임">
+      <figcaption>SCR-AUTH-003 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:110px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:130px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>이메일 입력</td><td>placeholder "you@example.com".</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>비밀번호 입력</td><td>Enter 키 입력 시 즉시 로그인 시도. 우측 눈 아이콘으로 마스킹 토글.</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>로그인 상태 유지 체크박스</td><td>단순 토글, 목업 상 별도 세션 연장 로직은 없음.</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[로그인] 버튼</td><td>①② 유효 형식 입력 시 활성화. 클릭 시 "인증 중..." 로딩 스피너(1.4초 목업) → 목업 계정과 일치하면 "JWT 발급 완료(목업)" 배지와 함께 역할별 이동 대상 화면을 안내 후 <b>실제 라우팅</b>으로 이동한다.</td><td>업체관리자→SCR-DASH-001 / 현장담당자→SCR-PROC-001 / 고객→SCR-DASH-002 / 플랫폼관리자→SCR-COMP-001</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>로그인 실패</td><td>계정 불일치 시 "이메일 또는 비밀번호가 올바르지 않습니다" + 실패 카운트 "n/5회" 표시. <b>5회 실패 시 캡차(CAPTCHA) 모달</b>이 우선 노출되며, 체크 후 [인증 완료]를 눌러야 실패 카운트가 초기화되고 재시도 가능.</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="edge"><td class="center">④''</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>승인 대기 계정 로그인</td><td>pending@test.com처럼 <code>pending</code> 플래그가 있는 계정은 인증에 성공해도 "승인 대기 중" 모달로 안내하고 로그인 처리하지 않는다(SCR-AUTH-001의 승인 대기 상태와 연동).</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[비밀번호를 잊으셨나요?] / [회원가입] 링크</td><td>하단 텍스트 링크 2종.</td><td>SCR-AUTH-004 / SCR-AUTH-001·002</td><td>-</td></tr>
+      <tr class="edge"><td class="center">⑥</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>승인 대기 모달 [확인] 버튼</td><td>모달 닫기만 수행, 로그인 상태로 전환되지 않음.</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="edge"><td class="center">⑦</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>캡차 모달 — 체크박스 + [인증 완료] 버튼</td><td>"로봇이 아닙니다" 체크 전에는 [인증 완료] 비활성. 체크 후 클릭 시 실패 카운트를 0으로 초기화하고 모달을 닫아 재로그인을 허용.</td><td>-</td><td>FUNC-AUTH-002-01</td></tr>
+      <tr class="happy"><td class="center">⑥(로그인 후)</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[로그아웃] 버튼 (헤더)</td><td>로그인 성공 후 헤더 우측에 사용자명과 함께 노출. 클릭 시 확인 모달 후 클라이언트 토큰 폐기 및 로그인 화면으로 복귀(서버측 세션/블랙리스트 처리는 백엔드 담당).</td><td>SCR-AUTH-003 (재진입)</td><td>FUNC-AUTH-002-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>인증 실패</b>: 이메일 또는 비밀번호 불일치 시 계정 존재 여부를 특정하지 않는 공통 오류 문구 사용.</li>
+      <li><b>5회 이상 실패</b>: 캡차(CAPTCHA) 인증 모달 강제 노출 — 자동화 로그인 시도 방지.</li>
+      <li><b>승인 대기 계정</b>: 인증 정보는 맞지만 로그인 자체를 차단하고 승인 대기 안내로 대체.</li>
+      <li>로그아웃은 클라이언트 토큰 삭제 외에 <b>서버측 세션/블랙리스트 처리</b>가 반드시 병행되어야 하며(FUNC-AUTH-002-02), 이 화면은 그 트리거만 담당한다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-DASH-001 / SCR-PROC-001 / SCR-DASH-002 / SCR-COMP-001(역할별 실제 라우팅 대상), SCR-AUTH-004(비밀번호 재설정), SCR-AUTH-001/002(회원가입).</p>
+  </div>
+  <!-- /SCR-AUTH-003 -->
+  <!-- SCR-AUTH-004 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-AUTH-004</span>
+          <span class="badge">인증/계정관리</span>
+          <span class="badge dashed">REQ-AUTH-003 · REQ-NFR-001</span>
+          <span class="badge">전체 사용자 공용</span>
+        </div>
+        <h3>비밀번호 재설정 / 변경</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 로그인 &gt; 비밀번호 찾기(비로그인) / 마이페이지 &gt; 비밀번호 변경(로그인) — 하나의 화면이 진입 경로(세션 유무)에 따라 상태 A(찾기)·상태 B(변경) 두 모드로 자동 전환</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>상단 상태 탭(상태 A 비밀번호 찾기 · 상태 B 비밀번호 변경)은 <b>읽기 전용 인디케이터</b>이며, 사용자가 직접 전환할 수 없고 <code>loggedIn</code> 세션 여부로 자동 결정된다 ("진입 경로/세션에 따라 상태가 자동 결정됩니다" 안내 문구).</li>
+      <li>비로그인 상태(상태 A): 가입 이메일 입력 필드 공란, [재설정 링크 받기] 비활성.</li>
+      <li>로그인 상태(상태 B): 현재/신규/확인 비밀번호 필드 공란, 신규 비밀번호 규칙 4종(8자 이상·영문·숫자·특수문자) 모두 미충족(○) 상태로 표시, [변경하기] 비활성.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-auth-004.png" alt="SCR-AUTH-004 비밀번호 재설정/변경 와이어프레임">
+      <figcaption>SCR-AUTH-004 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임, 상태 A(비밀번호 찾기) 기준 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr><td colspan="6" style="background:#f2f2f2;font-weight:700;">상태 A — 비밀번호 찾기 (비로그인)</td></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>가입 이메일 입력</td><td>이메일 형식 검증. Enter 키로도 요청 가능.</td><td>-</td><td>FUNC-AUTH-003-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[재설정 링크 받기] 버튼</td><td>유효한 이메일일 때만 활성화. 클릭 시 1.3초 로딩 후 "재설정 링크를 이메일로 발송했습니다 (30분 이내 확인)" 안내로 전환. <b>보안상 계정 존재 여부와 무관하게 항상 동일한 안내</b>를 표시(이메일 열거 공격 방지).</td><td>-</td><td>FUNC-AUTH-003-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>[데모] 30분 경과 후 링크 클릭 버튼</td><td>만료 시나리오 재현용 데모 버튼. 클릭 시 "만료된 링크입니다 — 재설정 링크는 발송 후 30분간만 유효합니다" 화면으로 전환.</td><td>-</td><td>FUNC-AUTH-003-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[다시 요청하기] 버튼</td><td>만료 화면에서 클릭 시 이메일 입력 폼으로 초기화하여 복귀.</td><td>-</td><td>FUNC-AUTH-003-01</td></tr>
+      <tr><td colspan="6" style="background:#f2f2f2;font-weight:700;">상태 B — 비밀번호 변경 (로그인 상태)</td></tr>
+      <tr class="happy"><td class="center">③(B)</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>현재 비밀번호 입력</td><td>목업 현재 비밀번호는 "1234". 눈 아이콘으로 마스킹 토글.</td><td>-</td><td>FUNC-AUTH-003-02</td></tr>
+      <tr class="edge"><td class="center">③(B)'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>현재 비밀번호 불일치</td><td>제출 시 목업값과 다르면 "현재 비밀번호가 올바르지 않습니다" 인라인 오류.</td><td>-</td><td>FUNC-AUTH-003-02</td></tr>
+      <tr class="happy"><td class="center">④(B)</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>신규 비밀번호 입력</td><td>입력할 때마다 규칙 4종 배지(8자 이상/영문 포함/숫자 포함/특수문자 포함)가 충족 여부(✓/○)로 실시간 갱신(REQ-NFR-001).</td><td>-</td><td>FUNC-AUTH-003-02 · REQ-NFR-001</td></tr>
+      <tr class="happy"><td class="center">⑤(B)</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>신규 비밀번호 확인</td><td>신규값과 실시간 비교.</td><td>-</td><td>FUNC-AUTH-003-02</td></tr>
+      <tr class="edge"><td class="center">⑤(B)'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>신규 비밀번호 불일치</td><td>값이 다르면 "비밀번호가 일치하지 않습니다" 오류, 입력 필드 강조.</td><td>-</td><td>FUNC-AUTH-003-02</td></tr>
+      <tr class="happy"><td class="center">⑥(B)</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[변경하기] 버튼</td><td>현재 비밀번호 입력 + 신규 비밀번호 규칙 충족 + 확인값 일치 시 활성화. 클릭 시 1.3초 로딩 후 "비밀번호가 변경되었습니다 — 보안을 위해 다시 로그인해주세요" 안내와 함께 로그인 화면 이동 카드 노출.</td><td>SCR-AUTH-003</td><td>FUNC-AUTH-003-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>재설정 링크 유효시간 30분</b> — 만료 시 재요청을 강제하며, 만료 전 상태와 만료 후 상태를 별개 화면으로 명확히 구분.</li>
+      <li><b>계정 열거(enumeration) 방지</b> — 가입 여부와 무관하게 항상 동일한 "발송 완료" 안내.</li>
+      <li><b>비밀번호 정책(REQ-NFR-001)</b> — 8자 이상 + 영문 + 숫자 + 특수문자 조합을 프론트에서 실시간 안내하며, 저장 시 백엔드에서 BCrypt 해시 처리(부록 6.3 이중검증 체크리스트 참조).</li>
+      <li><b>현재 비밀번호 확인 실패</b> — 신규 비밀번호 유효성과 무관하게 현재 비밀번호가 틀리면 변경을 차단.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-AUTH-003(로그인) — 비로그인 진입 지점이자 비밀번호 변경 완료 후 재로그인 유도 대상.</p>
+  </div>
+  <!-- /SCR-AUTH-004 -->
+  <!-- SCR-AUTH-005 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-AUTH-005</span>
+          <span class="badge">인증/계정관리</span>
+          <span class="badge dashed">REQ-AUTH-004 · REQ-NFR-002</span>
+          <span class="badge">플랫폼 관리자</span>
+        </div>
+        <h3>역할기반 접근권한(RBAC) 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 시스템관리 &gt; 권한관리 — 역할별 메뉴 접근권한 토글 및 API 접근범위(읽기전용)·감사로그를 관리하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>역할 탭은 "업체관리자"가 기본 선택. 해당 역할의 메뉴 접근 토글·API 접근범위·저장 이력(감사로그)이 로드된다.</li>
+      <li>변경사항이 없으므로 하단 상태 배지는 노출되지 않고 푸터는 "READY · 변경사항 없음", ④ [변경사항 저장] 버튼은 비활성.</li>
+      <li>"플랫폼관리자" 탭에는 🔒LOCK 표기가 있어 선택은 가능하나 해당 역할의 모든 토글이 비활성(읽기 전용)으로 렌더링된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-auth-005.png" alt="SCR-AUTH-005 RBAC 관리 와이어프레임">
+      <figcaption>SCR-AUTH-005 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>역할 선택 탭 (업체관리자/현장담당자/고객/플랫폼관리자🔒)</td><td>탭 클릭 시 해당 역할의 메뉴 접근표·API 범위·감사로그로 전환. 플랫폼관리자는 잠금 표시로 편집 불가함을 사전 안내.</td><td>-</td><td>FUNC-AUTH-004-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>미저장 변경 중 탭 전환 시도</td><td>저장하지 않은 변경사항이 있는 상태에서 다른 역할 탭을 클릭하면 전환을 막고 "저장되지 않은 변경사항이 있습니다" 오류 토스트를 노출한다.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>메뉴별 접근허용 토글 스위치</td><td>메뉴명·화면ID·접근허용(ON/OFF) 3열 테이블. 토글 클릭 시 즉시 로컬 상태 변경 + 상단에 "● 저장되지 않은 변경사항 (n)" 배지 노출, 푸터가 "DRAFT" 상태로 전환.</td><td>-</td><td>FUNC-AUTH-004-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>잠긴 역할의 토글</td><td>플랫폼관리자 탭에서는 모든 토글이 <code>disabled</code>(점선 테두리, 클릭 무반응)로 표시된다.</td><td>-</td><td>REQ-NFR-002</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>API 접근범위 표 (읽기 전용)</td><td>API 경로·Method·허용여부(ALLOW/DENY 배지)를 나열하는 읽기 전용 표. 편집 컨트롤 없음 — 실제 서버 정책 확인용.</td><td>-</td><td>REQ-NFR-002</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[변경사항 저장] 버튼</td><td>①에서 1건 이상 변경(dirty)되고 잠긴 역할이 아닐 때만 활성화. 클릭 시 저장 확인 모달을 연다.</td><td>-</td><td>FUNC-AUTH-004-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>저장 이력(감사로그) 목록</td><td>변경 시각·처리자(actor)·변경 요약을 최신순으로 나열(REQ-NFR-004 변경이력 자동기록과 연결).</td><td>-</td><td>REQ-NFR-004</td></tr>
+      <tr class="happy"><td class="center">⑧</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>저장 확인 모달 — [확인·적용] 버튼</td><td>클릭 시 변경 건수를 감사로그에 즉시 1건 추가하고, 기준값을 갱신 후 "변경사항이 전체 사용자에게 적용되었습니다" 토스트 노출.</td><td>-</td><td>FUNC-AUTH-004-01</td></tr>
+      <tr class="edge"><td class="center">⑨</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>저장 확인 모달 — [실패 시뮬레이션] 버튼</td><td>저장 실패 상황을 재현하는 데모 버튼. 클릭 시 감사로그에 기록하지 않고 "권한 변경에 실패했습니다. 다시 시도해주세요" 오류 토스트와 함께 푸터가 "ERROR" 상태로 전환.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>저장 확인 모달 — [취소] 버튼</td><td>모달만 닫고 변경사항(dirty)은 유지.</td><td>-</td><td>-</td></tr>
+    </table>
+
+    <div class="callout warn">본 화면은 <b>프론트엔드 UI(설정 화면)</b>일 뿐이며, 실제 접근 제어는 반드시 백엔드에서 JWT 클레임을 검증하여 강제한다(REQ-NFR-002). 여기서의 토글 On/Off는 정책을 "구성"하는 것이지 그 자체로 접근을 "차단"하는 로직이 아니다 — 화면 하단 고정 안내문구로도 명시되어 있다.</div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>미저장 변경 중 이탈</b>: 다른 역할 탭 전환을 막아 실수로 인한 변경 유실을 방지.</li>
+      <li><b>플랫폼관리자 역할 잠금(🔒)</b>: 최고 권한 역할은 이 화면에서 스스로를 수정할 수 없도록 원천 차단.</li>
+      <li><b>저장 실패 시나리오</b>: 실패 시 어떤 감사로그도 남기지 않고 오류 토스트만 노출, 재시도 가능.</li>
+      <li>변경사항 저장은 감사로그(REQ-NFR-004)에 자동 기록되어 "누가·언제·무엇을" 바꿨는지 추적 가능해야 한다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-COMP-001(업체 승인관리) — 동일하게 플랫폼 관리자가 사용하는 시스템 관리 화면군.</p>
+  </div>
+  <!-- /SCR-AUTH-005 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.2 업체관리 (SCR-COMP-001 ~ 002)</h3>
+  <!-- SCR-COMP-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-COMP-001</span>
+          <span class="badge">업체관리</span>
+          <span class="badge dashed">REQ-COMP-001</span>
+          <span class="badge">플랫폼 관리자</span>
+        </div>
+        <h3>업체 등록 및 승인 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 업체관리 &gt; 승인관리 — 가입 신청한 업체를 검토해 승인/반려 처리하는 화면. 로그인 성공 시 플랫폼 관리자의 <b>실제 라우팅</b> 기본 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>상태 필터는 "승인대기"가 기본 선택되며 각 필터 탭에 건수 배지가 함께 표시된다. 상세 패널은 닫힌 상태(목록 전체 폭 사용).</li>
+      <li>해당 상태의 업체가 없으면 표 본문에 "해당 상태의 업체가 없습니다" 빈 상태 문구를 노출한다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-comp-001.png" alt="SCR-COMP-001 업체 승인 관리 와이어프레임">
+      <figcaption>SCR-COMP-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상태 필터 탭(승인대기/승인완료/반려)</td><td>탭별 건수 배지 표시. 클릭 시 해당 상태 업체만 목록에 표시.</td><td>-</td><td>FUNC-COMP-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>업체 목록 테이블 (행 클릭)</td><td>상호명·사업자등록번호·담당자연락처·가입신청일·상태를 나열. 행 클릭 시 우측(데스크톱)/하단 오버레이(모바일)에 상세 패널을 연다.</td><td>-</td><td>FUNC-COMP-001-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>빈 목록</td><td>해당 상태의 업체가 0건이면 "해당 상태의 업체가 없습니다" 안내 행 표시.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상세 패널 (로고/사업자정보/소개글)</td><td>대표자명·사업자번호·업태/종목·담당자·이메일·사업장주소·가입신청일 전체 항목과 로고·소개글 미리보기를 표시. [✕] 버튼으로 닫기.</td><td>-</td><td>FUNC-COMP-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[승인] 버튼</td><td>승인대기 건에만 노출. 클릭 시 승인 확인 모달을 연다.</td><td>-</td><td>FUNC-COMP-001-02</td></tr>
+      <tr class="happy"><td class="center">⑨</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>승인 확인 모달 — [승인 확정] 버튼</td><td>클릭 시 해당 업체 상태를 "승인완료"로 전환, 처리일시·처리자를 기록하고 "계정이 즉시 활성화되고 업체 관리자에게 알림이 발송됩니다" 안내대로 SCR-NOTI-001 알림 트리거(목업)와 함께 성공 토스트 노출.</td><td>SCR-NOTI-001 (알림 트리거)</td><td>FUNC-COMP-001-02</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[반려] 버튼</td><td>승인대기 건에만 노출. 클릭 시 반려 사유 입력 모달을 연다.</td><td>-</td><td>FUNC-COMP-001-02</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>반려 사유 입력 모달 — 사유 textarea + [반려 확정] 버튼</td><td>사유는 필수(*) 입력이며 실시간 글자수 표시. 사유 입력 전에는 [반려 확정]이 점선 비활성 상태.</td><td>-</td><td>FUNC-COMP-001-02</td></tr>
+      <tr class="edge"><td class="center">⑥'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>반려 사유 미입력</td><td>공란이면 "사유 미입력 시 반려 확정 불가" 안내와 함께 버튼 비활성 유지.</td><td>-</td><td>FUNC-COMP-001-02</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>처리완료 건 재조회</td><td>승인완료/반려 상태의 업체를 다시 열면 "처리완료 — 추가 조치 불가" 안내만 표시되고 승인/반려 버튼은 렌더링되지 않는다. 반려 건은 사유가 <b>수정 불가한 이력</b>으로 함께 노출된다.</td><td>-</td><td>FUNC-COMP-001-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>반려 사유 필수</b>: 사유 없이는 반려를 확정할 수 없으며, 확정된 사유는 이후 <b>수정 불가</b> 이력으로 영구 보관된다(요구사항 "반려사유는 이력으로 보관" 반영).</li>
+      <li><b>처리완료 건 잠금</b>: 승인/반려가 끝난 업체는 추가 조치가 불가능하도록 버튼 자체를 숨겨 실수로 인한 재처리를 방지.</li>
+      <li><b>승인 시 알림 연동</b>: 승인 확정과 동시에 업체 관리자에게 알림이 발송됨을 화면 안내 문구로 고지(SCR-NOTI-001과 연계, 실제 발송은 백엔드 이벤트 트리거).</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-NOTI-001(알림 발송 관리) — 승인 처리 시 발송되는 알림의 이력을 조회.</p>
+  </div>
+  <!-- /SCR-COMP-001 -->
+  <!-- SCR-COMP-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-COMP-002</span>
+          <span class="badge">업체관리</span>
+          <span class="badge dashed">REQ-COMP-002</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>소속 직원(현장담당자) 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 업체관리 &gt; 직원관리 — 현장담당자를 초대하고 프로젝트를 배정하는 업체 관리자 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>소속 직원 목록과 전체/초대중/활성 요약 카운트가 초기 데이터로 표시된다. 모달은 모두 닫힌 상태.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-comp-002.png" alt="SCR-COMP-002 소속 직원 관리 와이어프레임">
+      <figcaption>SCR-COMP-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[+ 직원 초대] 버튼</td><td>화면 상단 우측 고정. 클릭 시 초대 이메일 입력 모달을 연다.</td><td>-</td><td>FUNC-COMP-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>초대 모달 — 이메일 입력 + [초대 발송] 버튼</td><td>이메일 입력 후 Enter 또는 [초대 발송] 클릭 시 형식 검증을 통과하면 목록에 "초대중" 상태로 즉시 추가되고 성공 토스트 노출.</td><td>-</td><td>FUNC-COMP-002-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>초대 입력 오류</td><td>공란 시 "이메일을 입력해주세요", 형식 오류 시 "올바른 이메일 형식이 아닙니다", 이미 등록된 이메일 재초대 시 "이미 초대된 이메일입니다" 오류.</td><td>-</td><td>FUNC-COMP-002-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>소속 직원 목록 테이블</td><td>이름·이메일·가입상태(초대중/활성)·배정 프로젝트 수를 나열.</td><td>-</td><td>FUNC-COMP-002-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[배정] 버튼 (행별)</td><td>직원별 행 우측에 위치. 클릭 시 해당 직원의 프로젝트 배정 모달을 연다(기존 배정값을 체크 상태로 미리 채움).</td><td>-</td><td>FUNC-COMP-002-02</td></tr>
+      <tr class="happy"><td class="center">⑤/⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>배정 모달 — 프로젝트 체크리스트 + [배정 저장] 버튼</td><td>다중 선택 가능한 프로젝트 체크리스트. 1개 이상 선택 시 [배정 저장] 활성화, 클릭 시 배정 건수를 목록에 즉시 반영하고 성공 토스트 노출.</td><td>-</td><td>FUNC-COMP-002-02</td></tr>
+      <tr class="edge"><td class="center">⑤'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>배정 미선택</td><td>선택 0건이면 "1개 이상 선택해야 배정 저장 가능" 안내와 함께 [배정 저장] 비활성.</td><td>-</td><td>FUNC-COMP-002-02</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>모달 공용 [취소] 버튼</td><td>초대/배정 모달 각각에서 입력값을 버리고 닫기.</td><td>-</td><td>-</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>중복 초대 방지</b>: 이미 목록에 있는 이메일은 재초대할 수 없도록 사전 차단.</li>
+      <li><b>배정 최소 1건</b>: 프로젝트를 하나도 선택하지 않은 상태로는 저장할 수 없다.</li>
+      <li>초대/배정은 프론트엔드 와이어프레임 동작이며, 실제 초대 이메일 발송·계정 활성화·권한 부여는 백엔드에서 처리됨을 화면 하단에 고지.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PROC-001(공정 관리) — 배정된 현장담당자가 실제로 진입해 공정을 관리하는 화면.</p>
+  </div>
+  <!-- /SCR-COMP-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.3 고객문의관리 (SCR-INQ-001 ~ 002)</h3>
+  <!-- SCR-INQ-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-INQ-001</span>
+          <span class="badge">고객문의관리</span>
+          <span class="badge dashed">REQ-INQ-001</span>
+          <span class="badge">인테리어 고객</span>
+        </div>
+        <h3>시공 문의 등록</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 문의하기 — 업체를 선택해 공간정보·희망예산·희망일정을 입력하고 시공 문의를 등록하는 7단계 세로 스텝 폼</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>7개 스텝이 세로 타임라인(원형 번호 + 연결선)으로 나열되며 모든 필드는 공란, 첨부파일 없음.</li>
+      <li>⑦ [문의 등록] 버튼은 필수 항목 ①②③④가 모두 채워지기 전까지 비활성.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-inq-001.png" alt="SCR-INQ-001 시공 문의 등록 와이어프레임">
+      <figcaption>SCR-INQ-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>업체 선택 (검색형 드롭다운)</td><td>업체명 검색어 입력 시 실시간 필터링된 드롭다운 목록 노출, 항목 클릭 시 선택 확정 및 "선택됨: OOO" 표시.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>검색 결과 없음</td><td>일치하는 업체가 없으면 "검색 결과 없음" 안내 표시.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>공간정보 (평형 · 공간유형 드롭다운 2종)</td><td>필수 셀렉트 2개. 평형 6단계, 공간유형 6종(아파트/빌라·연립/오피스텔/단독주택/상가·사무실/기타).</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>희망예산 (최소~최대, 만원)</td><td>숫자 입력 2개. 둘 다 입력해야 유효.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>예산 범위 오류</td><td>최소값이 최대값보다 크면 "⚠ 최소 예산이 최대 예산보다 클 수 없습니다" 실시간 오류 표시, 등록 버튼 비활성 조건에 포함.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>희망일정 (시작일~종료일)</td><td>date picker 2개, 필수.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상세 요청사항</td><td>선택 입력, 최대 500자, 실시간 글자수 카운터.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>첨부파일 — 드래그&드롭 / [파일 선택] 버튼</td><td>평면도·참고사진 다중 첨부. 드래그 오버 시 박스 강조. jpg/png/pdf만 허용, 파일당 최대 10MB 안내 문구 고정 노출. 각 파일 항목에 [×] 삭제 버튼.</td><td>-</td><td>FUNC-INQ-001-02</td></tr>
+      <tr class="edge"><td class="center">⑥'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>첨부파일 형식/용량 오류</td><td>허용 형식(jpg/png/pdf)이 아니거나 10MB를 초과하면 해당 파일 행에 "⚠ 형식/용량을 확인해주세요" 오류 표시(등록 자체는 차단하지 않고 파일별 경고만 표시).</td><td>-</td><td>FUNC-INQ-001-02</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[문의 등록] 버튼</td><td>①②③④ 필수값 유효 시 활성화. 클릭 시 "접수 중..." 상태(1.2초 목업) 후 완료 화면으로 전환.</td><td>-</td><td>FUNC-INQ-001-01</td></tr>
+      <tr class="happy"><td class="center">⑧</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>완료 화면 — [마이페이지로 이동] / [새 문의 작성] 버튼</td><td>등록 완료 후 "담당 업체가 확인 후 연락드릴 예정입니다" 안내와 함께 2개 버튼 제공. [새 문의 작성]은 폼을 초기화하고 재입력 가능.</td><td>SCR-DASH-002(이동 제안)</td><td>FUNC-INQ-001-01</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>예산 범위 오류</b>: 최소&gt;최대 시 등록을 차단하고 인라인 오류로 즉시 안내.</li>
+      <li><b>첨부파일 제약(REQ-INQ-001-02)</b>: jpg/png/pdf, 파일당 10MB 제한을 프론트에서 1차 검증 — 실제 저장 시 백엔드에서도 동일 정책 재검증 필요.</li>
+      <li>등록 완료 시 <b>SCR-INQ-002(업체 문의 목록)</b>에 신규 문의로 즉시 반영됨을 화면에 명시.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-DASH-002(고객 마이페이지), SCR-INQ-002(문의 처리 관리 — 업체 측에서 이 문의를 확인·처리).</p>
+  </div>
+  <!-- /SCR-INQ-001 -->
+  <!-- SCR-INQ-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-INQ-002</span>
+          <span class="badge">고객문의관리</span>
+          <span class="badge dashed">REQ-INQ-002</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>문의 처리 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 문의관리 — 접수된 문의를 상태별로 관리하고 담당자를 배정하는 화면. "견적서 작성하기" 선택 시 <b>SCR-QUOTE-001로 실제 이동</b></p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>상태 필터는 "전체"가 기본 선택되며 탭마다 건수가 괄호로 표시된다. 데스크톱은 첫 번째 문의(INQ-2401)가 기본 선택되어 상세 패널이 열려 있고, 모바일은 목록만 노출(행 클릭 시 상세로 전환).</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-inq-002.png" alt="SCR-INQ-002 문의 처리 관리 와이어프레임">
+      <figcaption>SCR-INQ-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:150px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상태 필터 탭 (전체/신규/상담중/견적발송/종료)</td><td>탭별 건수 표시, 클릭 시 목록 필터링.</td><td>-</td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>문의 목록 테이블 (행 클릭)</td><td>고객명·공간정보·희망예산·희망일정·접수일·상태·담당자 열. 행 클릭 시 상세 패널 오픈.</td><td>-</td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>빈 목록</td><td>필터 결과 0건이면 "해당 상태의 문의가 없습니다" 안내 행.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상세 패널 (요청정보 + 첨부파일)</td><td>공간정보·희망예산·희망일정·접수일·상세 요청사항 및 첨부파일 썸네일(PDF/IMG 라벨)을 표시. [×] 버튼으로 패널 닫기.</td><td>-</td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상태 변경 드롭다운</td><td>신규→상담중→견적발송→종료 순서로 상태 전환. 하단에 흐름 안내 문구 고정.</td><td>-</td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>담당자 미배정 상태에서 "상담중" 전환</td><td>담당자가 없는 문의를 "상담중"으로 바꾸려 하면 전환을 막고 "담당자를 먼저 배정해주세요" 경고 토스트를 노출한다.</td><td>-</td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="happy"><td class="center">④''</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>"견적발송" 상태로 전환 시 확인 모달</td><td>"견적서를 작성하시겠습니까?" 모달이 뜨며, [나중에]는 상태만 "견적발송"으로 바꾸고, <b>[견적서 작성하기 →]는 상태 변경 + 실제로 SCR-QUOTE-001(/screens/scr-quote-001)로 라우팅</b>한다(0.5초 지연 후 이동, 토스트로 사전 안내).</td><td><b>SCR-QUOTE-001 (실제 라우팅)</b></td><td>FUNC-INQ-002-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>담당자 배정 드롭다운</td><td>4명의 직원 목록 중 선택, 즉시 반영 + 성공 토스트("담당자가 'OOO'(으)로 배정되었습니다").</td><td>-</td><td>FUNC-INQ-002-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>담당자 미배정 상태 전환 차단</b>: "상담중"으로의 전환은 담당자 배정을 선행 조건으로 강제.</li>
+      <li><b>견적발송 전환은 항상 확인 모달을 경유</b>하며, 그 안에서 견적서 작성 여부(즉시 이동 vs 나중에)를 사용자가 선택하도록 분기.</li>
+      <li>본 화면은 요구사항 정의서 6장 실제 라우팅 목록에 포함된 두 화면 전환 중 하나(SCR-INQ-002 → SCR-QUOTE-001)를 구현한다 — 3장 User Flow 표 참조.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-QUOTE-001(견적서 작성) — "견적서 작성하기" 선택 시 실제 라우팅으로 이동.</p>
+  </div>
+  <!-- /SCR-INQ-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.4 견적관리 (SCR-QUOTE-001 ~ 002)</h3>
+  <!-- SCR-QUOTE-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-QUOTE-001</span>
+          <span class="badge">견적관리</span>
+          <span class="badge dashed">REQ-QUOTE-001</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>견적서 작성</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 견적관리 &gt; 작성 — 견적 항목을 구성하고 할인·합계를 실시간 계산해 고객에게 발송하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>문의 #INQ-1043(이하늘 고객) 기준 목업 항목 3건(강마루 시공/도배/목공 인건비)이 미리 채워져 있고, 할인율은 5%가 기본값.</li>
+      <li>합계 영역에 소계·할인액·최종 합계가 실시간으로 계산되어 표시된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-quote-001.png" alt="SCR-QUOTE-001 견적서 작성 와이어프레임">
+      <figcaption>SCR-QUOTE-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>견적 항목 테이블 (항목명/구분/단가/수량/소계/[✕]삭제)</td><td>항목명 텍스트, 구분(자재비·인건비·부대비용) 셀렉트, 단가·수량 숫자 입력. 소계 = 단가×수량으로 행 단위 실시간 계산.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>단가/수량 숫자 오류</td><td>숫자가 아닌 값 입력 시 해당 셀 테두리가 강조되고 소계란에 "숫자 확인" 표시, 하단에 "단가/수량에 잘못된 값이 있어 발송할 수 없습니다" 경고. 항목이 0건이면 "항목이 1개 이상 있어야 발송할 수 있습니다" 안내.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[+ 항목 추가] 버튼</td><td>빈 행을 테이블 하단에 추가.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[✕] 행 삭제 버튼</td><td>해당 항목 행을 즉시 제거.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>할인율 입력 (선택, %)</td><td>숫자만 허용, 100% 초과 시 100으로 클램프 처리되어 계산.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>할인율 숫자 오류</td><td>숫자가 아닌 값 입력 시 "숫자만 입력하세요" 오류, 발송 버튼 비활성 조건에 포함.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>합계 금액 영역 (읽기 전용)</td><td>소계 합산 → 할인 금액 차감 → 최종 합계를 원화(천단위 콤마) 표기로 실시간 표시.</td><td>-</td><td>FUNC-QUOTE-001-01</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[미리보기(PDF)] 버튼</td><td>클릭 시 견적서 형태(항목·소계·최종 합계)의 PDF 미리보기 모달을 연다(목업 렌더링 영역으로 표기).</td><td>-</td><td>FUNC-QUOTE-001-02</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[견적서 발송] 버튼</td><td>항목 1건 이상 + 모든 셀 유효 + 할인율 유효 시 활성화. 클릭 시 발송 확인 모달 → [발송하기] 클릭 시 발송 완료 처리, 문의 상태 '견적발송'으로 갱신, 고객 알림(SCR-NOTI-001) 트리거를 푸터에 안내.</td><td>SCR-INQ-002 목록 복귀 · SCR-QUOTE-002 고객 알림 · SCR-NOTI-001 트리거</td><td>FUNC-QUOTE-001-02</td></tr>
+      <tr class="happy"><td class="center">⑦'</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>발송 확인 모달 — [취소]/[발송하기] 버튼</td><td>[취소]는 모달만 닫고, [발송하기]가 실제 발송을 확정한다(2단계 확인으로 오발송 방지).</td><td>-</td><td>FUNC-QUOTE-001-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>계산 예외</b>: 단가/수량이 숫자가 아니면 해당 행 계산을 차단하고 전체 발송도 막는다. 항목 0건도 동일하게 발송 차단.</li>
+      <li><b>할인율 경계값</b>: 100%를 초과 입력해도 계산상 100%로 클램프되어 합계가 음수가 되지 않는다.</li>
+      <li><b>PDF 변환(REQ-QUOTE-001-02, 난이도 상)</b>: 현재는 목업 미리보기이며, 실제 PDF 생성/발송 로직은 백엔드 구현이 필요.</li>
+      <li>발송은 2단계 확인(발송 버튼 → 확인 모달)을 거쳐 오발송을 방지한다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-INQ-002(문의 처리 관리 — 진입 경로), SCR-QUOTE-002(견적 승인 프로세스 — 발송 후 고객이 확인), SCR-NOTI-001(알림 발송 관리).</p>
+  </div>
+  <!-- /SCR-QUOTE-001 -->
+  <!-- SCR-QUOTE-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-QUOTE-002</span>
+          <span class="badge">견적관리</span>
+          <span class="badge dashed">REQ-QUOTE-002</span>
+          <span class="badge">고객 / 업체 관리자(읽기전용)</span>
+        </div>
+        <h3>견적 승인 프로세스</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 견적확인 — 고객이 견적을 승인/거절하는 화면. <b>업체 관리자로 보면 수정이력만 조회 가능한 읽기전용 모드</b>로 자동 전환</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>견적 상태는 "승인 대기"로 시작. <b>고객 역할</b>은 "견적서" 탭이 기본 노출되며 승인/거절 버튼이 활성 상태로 제공된다.</li>
+      <li><b>업체 관리자 역할</b>은 탭 선택권 없이 "수정이력" 탭만 강제로 표시되고, 상단에 "업체 관리자 · 읽기 전용 모드 — 승인/거절 기능이 비활성화되어 있습니다" 안내 문구가 노출된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-quote-002.png" alt="SCR-QUOTE-002 견적 승인 프로세스 와이어프레임">
+      <figcaption>SCR-QUOTE-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:130px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>견적서 요약 카드 (읽기 전용)</td><td>항목·사양·수량·단가·금액과 VAT 별도 합계를 표 형태로 표시.</td><td>-</td><td>FUNC-QUOTE-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[승인] 버튼 (고객 전용)</td><td>클릭 시 승인 확인 모달 → 확정 시 상태가 "승인완료"로 전환되고 <b>SCR-CONT-001 계약서 자동 생성이 트리거</b>됨을 토스트로 안내.</td><td>SCR-CONT-001 (트리거)</td><td>FUNC-QUOTE-002-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[거절] 버튼 (고객 전용)</td><td>클릭 시 거절 사유 입력 모달을 연다.</td><td>-</td><td>FUNC-QUOTE-002-01</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>거절 사유 입력 + 확정</td><td>사유 입력 후 확정 시 상태가 "거절"로 전환되고 "업체측에 알림이 전송되었습니다" 토스트 노출.</td><td>-</td><td>FUNC-QUOTE-002-01</td></tr>
+      <tr class="edge"><td class="center">-</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>이미 처리된 견적 재조회</td><td>승인완료/거절 상태에서는 "이미 처리된 견적입니다" 안내와 현재 상태 배지만 표시되고 승인/거절 버튼은 렌더링되지 않는다.</td><td>-</td><td>FUNC-QUOTE-002-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[수정이력] 탭 + 이력 목록</td><td>버전 배지·요약·수정일시/수정자·금액을 나열, 항목 클릭 시 상세 모달(스냅샷 재현)을 연다. 고객은 [견적서] 탭과 함께 선택 가능, 업체 관리자는 이 탭만 강제 노출(읽기 전용).</td><td>-</td><td>FUNC-QUOTE-002-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>역할별 읽기전용 모드</b>: 업체 관리자는 자신이 보낸 견적을 스스로 승인/거절할 수 없도록 UI 자체에서 버튼을 제공하지 않는다(요구사항 정의서 상 "업체 관리자는 수정이력만 조회 가능한 읽기전용 모드").</li>
+      <li><b>처리완료 잠금</b>: 승인/거절이 끝난 견적은 재처리를 막아 상태 충돌을 방지.</li>
+      <li><b>수정이력 스냅샷(REQ-QUOTE-002-02)</b>: 견적이 수정될 때마다 이전 버전을 스냅샷으로 보관해 재현 가능하게 하며, 상세 모달에서 각 버전의 내용을 열람할 수 있다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-CONT-001(계약서 생성/관리) — 견적 승인 시 자동으로 계약서 초안이 생성됨.</p>
+  </div>
+  <!-- /SCR-QUOTE-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.5 계약관리 (SCR-CONT-001)</h3>
+  <!-- SCR-CONT-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-CONT-001</span>
+          <span class="badge">계약관리</span>
+          <span class="badge dashed">REQ-CONT-001</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>계약서 생성/관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 계약관리 — 승인된 견적을 기반으로 계약서를 생성하고 전자서명(목업)·상태를 관리하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>상태는 "계약대기"로 시작하며 승인된 견적 항목이 자동 인용된 계약서 초안이 표시된다. 전자서명은 미완료 상태([전자서명 요청] 버튼 노출), 결제 마일스톤 배너는 미표시.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-cont-001.png" alt="SCR-CONT-001 계약서 생성/관리 와이어프레임">
+      <figcaption>SCR-CONT-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:130px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>계약서 초안 미리보기 (읽기 전용)</td><td>계약번호·견적번호·발주자/수급자, 승인된 견적 항목표, 계약금액(VAT별도)을 자동 인용하여 표시. "본 문서는 초안이며 전자서명 후 효력이 발생합니다" 고지문 포함.</td><td>-</td><td>FUNC-CONT-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>계약 상태 변경 드롭다운 (계약대기→체결→완료)</td><td>선택 시 즉시 상태 전환 + 이력 1건 자동 추가 + 성공 토스트. "체결" 전환 시 결제 마일스톤 등록 가능 배너가 나타난다.</td><td>-</td><td>FUNC-CONT-001-02</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>단계 건너뛰기 시도</td><td>"계약대기" 상태에서 곧바로 "완료"로 전환을 시도하면 "체결 상태를 먼저 진행해주세요" 경고를 표시하고 전환을 막는다(순차 전환 강제).</td><td>-</td><td>FUNC-CONT-001-02</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[전자서명 요청] 버튼 → 서명 모달</td><td>클릭 시 "외부 전자서명 서비스 연동은 학습 범위 밖입니다. 아래 체크박스로 서명 완료를 대체합니다" 안내와 함께 [서명을 완료했습니다] 체크박스를 제공하는 목업 모달을 연다. 체크 후 [확인] 클릭 시 "✓ 서명완료" 배지로 전환.</td><td>-</td><td>FUNC-CONT-001-03</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>서명 미체크 상태에서 확인</td><td>체크박스를 선택하지 않으면 [확인] 버튼이 비활성 상태로 유지된다.</td><td>-</td><td>FUNC-CONT-001-03</td></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[SCR-PAY-001 결제 마일스톤 등록 →] 배너 버튼</td><td>계약이 "체결" 또는 "완료" 상태일 때만 노출되는 이동 안내 버튼.</td><td>SCR-PAY-001</td><td>FUNC-CONT-001-02</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>계약 상태 변경 이력 목록</td><td>변경 전→후 상태, 변경자, 변경일시를 최신순으로 나열(REQ-NFR-004 변경이력 자동기록과 연계).</td><td>-</td><td>FUNC-CONT-001-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>상태 순차 전환 강제</b>: 계약대기 → 체결 → 완료 순서를 건너뛸 수 없도록 UI에서 차단.</li>
+      <li><b>전자서명 목업 처리(REQ-CONT-001-03, Could·학습범위 외)</b>: 실제 전자서명 서비스 연동 대신 체크박스로 "서명 완료"를 대체하며, 화면에 그 사실을 명시적으로 고지한다.</li>
+      <li>모든 상태 변경은 이력으로 자동 기록되어 감사 추적이 가능해야 한다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PAY-001(결제 단계 등록 및 상태 관리) — 계약 체결 후 결제 마일스톤을 등록하는 다음 단계.</p>
+  </div>
+  <!-- /SCR-CONT-001 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.6 시공관리 (SCR-PROC-001 ~ 002)</h3>
+  <!-- SCR-PROC-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-PROC-001</span>
+          <span class="badge">시공관리</span>
+          <span class="badge dashed">REQ-PROC-001</span>
+          <span class="badge">현장 담당자</span>
+        </div>
+        <h3>공정 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 시공관리 &gt; 공정관리 — 세로 타임라인/체크리스트 형태로 공정 단계별 진행률과 지연 이슈를 관리하는 화면. SCR-DASH-001의 프로젝트 리스트 행 클릭 시 <b>실제 라우팅</b>으로 도달하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>착공일과 함께 세로 타임라인에 공정 단계 카드가 순서대로 나열되며, 진행중 1 · 완료 1 · 예정 1 등 요약이 푸터에 표시된다.</li>
+      <li>등록된 공정이 없으면 "등록된 공정이 없습니다. 상단 '공정 템플릿 적용'으로 시작하세요" 빈 상태 문구가 노출된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-proc-001.png" alt="SCR-PROC-001 공정 관리 와이어프레임">
+      <figcaption>SCR-PROC-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:150px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[+ 공정 템플릿 적용] 버튼 → 템플릿 모달</td><td>클릭 시 철거/설비/마감 등 표준 공정 체크리스트 모달을 연다. 기본적으로 전체 선택된 상태이며 개별 해제 가능. [n개 등록] 버튼 클릭 시 선택 항목이 세로 타임라인으로 일괄 등록.</td><td>-</td><td>FUNC-PROC-001-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>템플릿 0건 선택</td><td>모든 항목을 해제하면 [n개 등록] 버튼이 비활성화된다.</td><td>-</td><td>FUNC-PROC-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>공정 단계 카드 (타임라인 노드)</td><td>단계명·상태 배지(예정/진행중/완료)를 표시. 완료 시 원형 노드가 체크(✓) 아이콘으로 바뀐다.</td><td>-</td><td>FUNC-PROC-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>진행률 슬라이더 (0~100%, 5% 단위)</td><td>슬라이더 이동 시 진행률 프로그레스바가 실시간 갱신되고, 진행률 구간에 따라 상태(예정/진행중/완료)가 자동 매핑된다. <b>100%에 도달하면 자동으로 "완료" 처리</b> 및 완료 토스트 노출.</td><td>-</td><td>FUNC-PROC-001-02</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>완료예정일 date picker</td><td>단계별 완료예정일을 변경.</td><td>-</td><td>FUNC-PROC-001-02</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>완료일 오류</td><td>선택한 완료일이 프로젝트 착공일보다 이전이면 "⚠ 완료일이 프로젝트 시작일(YYYY-MM-DD)보다 이전입니다" 오류 문구를 표시(제출 자체를 막지는 않고 경고).</td><td>-</td><td>FUNC-PROC-001-02</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[지연/이슈 등록] 버튼 → 이슈 모달</td><td>클릭 시 지연 사유(필수)·예상 지연기간(선택) 입력 모달을 연다. 등록 시 카드 헤더에 "⚠ 지연" 배지가 추가되고(hover 시 사유 툴팁), 등록 완료 토스트 노출.</td><td>-</td><td>FUNC-PROC-001-03</td></tr>
+      <tr class="edge"><td class="center">⑤'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>지연 사유 미입력</td><td>사유가 공란이면 [등록] 버튼이 비활성 상태로 유지된다.</td><td>-</td><td>FUNC-PROC-001-03</td></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[사진 업로드 → SCR-PROC-002] 버튼</td><td>각 공정 카드 하단의 이동 안내 버튼(현재 프로토타입에서는 실제 라우팅이 아닌 라벨 안내).</td><td>SCR-PROC-002 (이동 제안)</td><td>REQ-PROC-002</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>진행률-상태 자동 매핑</b>: 슬라이더 값에 따라 예정/진행중/완료 상태가 자동 전환되어 담당자가 상태를 별도로 다시 지정할 필요가 없다.</li>
+      <li><b>완료일 역행 경고</b>: 착공일 이전 날짜를 선택해도 저장은 막지 않지만 경고 문구로 데이터 오류 가능성을 알린다.</li>
+      <li><b>지연 사유 필수</b>: 사유 없는 지연 등록은 차단, 예상 지연기간은 선택 입력.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PROC-002(시공 사진 관리) — 공정 단계별 사진 업로드로 이어지는 다음 액션. SCR-DASH-001에서 프로젝트 행 클릭 시 실제 라우팅으로 진입.</p>
+  </div>
+  <!-- /SCR-PROC-001 -->
+  <!-- SCR-PROC-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-PROC-002</span>
+          <span class="badge">시공관리</span>
+          <span class="badge dashed">REQ-PROC-002</span>
+          <span class="badge">현장 담당자 / 고객</span>
+        </div>
+        <h3>시공 사진 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 시공관리 &gt; 사진관리(현장담당자) / 메인 &gt; 마이페이지 &gt; 사진갤러리(고객) — 모드 A(업로드)·모드 B(읽기전용 갤러리) 두 모드를 전환할 수 있는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li><b>모드 A(현장담당자 업로드)</b>: 공정 단계 미선택, 촬영일시는 오늘 날짜 기본값, 메모 공란, 스테이징된 파일 없음. 최근 업로드 4건이 미리 표시된다.</li>
+      <li><b>모드 B(고객 갤러리)</b>: 공정 단계별로 그룹핑된 사진이 시간순(최신순) 정렬로 6장씩 노출된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-proc-002.png" alt="SCR-PROC-002 시공 사진 관리 와이어프레임">
+      <figcaption>SCR-PROC-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임, 모드 A 업로드 화면 기준 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr><td colspan="6" style="background:#f2f2f2;font-weight:700;">모드 A — 현장담당자 업로드</td></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>공정 단계 선택 (필수)</td><td>드롭다운으로 사진을 연결할 공정 단계를 지정.</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>공정 단계 미선택 업로드 시도</td><td>미선택 상태로 [업로드] 클릭 시 "⚠ 공정 단계를 먼저 선택해주세요" 오류와 함께 업로드가 중단된다.</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>사진 업로드 드롭존 — [파일 선택]/[+ 이미지 추가(모의)] 버튼</td><td>드래그앤드롭 또는 버튼으로 다중 이미지 스테이징. 스테이징된 파일은 썸네일 + [×] 삭제로 나열.</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="edge"><td class="center">②'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>비이미지 파일 업로드 (+ 비이미지(모의) 버튼)</td><td>이미지가 아닌 파일은 "이미지 파일만 업로드할 수 있습니다" 오류 토스트로 거부되고 스테이징되지 않는다(형식 제약 REQ-PROC-002-01 반영).</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>촬영일시 (선택, 기본값 오늘)</td><td>텍스트 입력(YYYY-MM-DD HH:mm).</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>메모 (선택)</td><td>현장 메모 자유 입력.</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[업로드] 버튼</td><td>클릭 시 진행률 바가 0→100%로 애니메이션되며(목업), 완료 시 새 사진이 목록 최상단에 반영되고 "n장 업로드 완료" 알림.</td><td>-</td><td>FUNC-PROC-002-01</td></tr>
+      <tr><td colspan="6" style="background:#f2f2f2;font-weight:700;">모드 B — 고객 읽기전용 갤러리</td></tr>
+      <tr class="happy"><td class="center">⑥</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>공정단계별 갤러리 그리드</td><td>공정 단계 그룹 헤더 + 사진 썸네일(날짜·메모 캡션) 그리드. 썸네일 클릭 시 확대 모달 오픈.</td><td>-</td><td>FUNC-PROC-002-02</td></tr>
+      <tr class="happy"><td class="center">⑦</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>사진 확대 모달 — [‹]/[›] 이전·다음 버튼</td><td>공정단계·촬영일시·메모 상세 정보와 함께 좌우 탐색. 첫/마지막 사진에서는 해당 방향 버튼이 비활성화.</td><td>-</td><td>FUNC-PROC-002-02</td></tr>
+      <tr class="happy"><td class="center">⑪</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[더 보기 (무한스크롤/페이징)] 버튼</td><td>클릭할 때마다 6장씩 추가 노출, 전체를 다 불러오면 "모든 사진을 불러왔습니다"로 대체.</td><td>-</td><td>FUNC-PROC-002-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>공정 단계 미선택</b>: 업로드 자체를 차단하는 필수 조건.</li>
+      <li><b>파일 형식 제약</b>: 이미지가 아닌 파일은 업로드 목록에 추가되지 않고 즉시 거부.</li>
+      <li>고객 갤러리는 <b>읽기 전용</b>이며 업로드/삭제 등 편집 기능이 전혀 노출되지 않는다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PROC-001(공정 관리) — 업로드된 사진이 연결되는 상위 공정 단계 화면.</p>
+  </div>
+  <!-- /SCR-PROC-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.7 결제관리 (SCR-PAY-001 ~ 002)</h3>
+  <!-- SCR-PAY-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-PAY-001</span>
+          <span class="badge">결제관리</span>
+          <span class="badge dashed">REQ-PAY-001 · REQ-NFR-009</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>결제 단계 등록 및 상태 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 결제관리 — 계약금/중도금/잔금 등 결제 마일스톤을 등록하고 입금을 확인하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>총 결제액·입금 완료·미수금 요약이 상단에 표시되며, 초기 마일스톤 목록(계약금 등)이 로드된다. 완료 상태의 행에는 [입금 확인] 버튼이 없고 "확인 완료" 텍스트만 표시된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-pay-001.png" alt="SCR-PAY-001 결제 단계 등록 및 상태 관리 와이어프레임">
+      <figcaption>SCR-PAY-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[+ 결제 단계 추가] 버튼 → 등록 모달</td><td>결제단계명(필수)·금액(필수)·입금기한(선택) 입력 후 [등록] 클릭 시 "대기" 상태로 목록에 즉시 추가.</td><td>-</td><td>FUNC-PAY-001-01</td></tr>
+      <tr class="edge"><td class="center">①'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>등록 입력값 오류</td><td>단계명 공란 시 "결제단계명을 입력해주세요.", 금액이 공란/숫자아님/0 이하이면 "금액을 입력해주세요." 또는 "금액은 0보다 큰 값이어야 합니다." 오류 토스트와 인라인 메시지.</td><td>-</td><td>FUNC-PAY-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>결제 마일스톤 목록 (단계명/금액/입금기한/상태/입금확인일)</td><td>데스크톱은 표, 모바일은 카드형으로 동일 정보를 표시.</td><td>-</td><td>FUNC-PAY-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[입금 확인] 버튼 (대기 상태 행) → 확인 모달</td><td>입금확인일(필수, 기본 오늘)·메모(선택) 입력 후 [확인] 클릭 시 <b>상태가 대기→완료로 전환</b>되고 "고객에게 결제 완료 알림이 발송됩니다" 안내.</td><td>SCR-NOTI-001 (알림 트리거)</td><td>FUNC-PAY-001-02</td></tr>
+      <tr class="edge"><td class="center">④'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>완료 처리 되돌리기 불가</td><td>"완료 처리된 단계는 되돌릴 수 없습니다"를 모달·하단 고정 문구 양쪽에 명시하여 오조작을 방지.</td><td>-</td><td>FUNC-PAY-001-02</td></tr>
+    </table>
+
+    <div class="callout warn">본 화면은 <b>PG 자동연동 이전까지 수동 확인 방식</b>으로 동작한다(요구사항 제약사항). 결제 승인 후에는 PG사가 발급한 거래 토큰과 결제 결과만 저장하고 카드정보 자체는 저장하지 않는다(REQ-NFR-009, 부록 6.3 이중검증 체크리스트 참조) — 이 화면에는 카드정보 입력 필드가 존재하지 않는다.</div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>등록 필수값 검증</b>: 단계명·금액(0 초과) 미충족 시 등록 차단.</li>
+      <li><b>완료 처리 비가역</b>: 입금 확인 후 상태를 되돌리는 UI를 제공하지 않는다.</li>
+      <li><b>카드정보 비저장 원칙(REQ-NFR-009)</b>: 결제 승인은 PG사 위탁, 플랫폼은 거래 토큰·결과만 저장.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-NOTI-001(알림 발송 관리 — 입금 확인 시 알림 트리거), SCR-PAY-002(결제 이력 조회 — 동일 데이터를 고객/업체 양쪽에서 읽기전용으로 노출).</p>
+  </div>
+  <!-- /SCR-PAY-001 -->
+  <!-- SCR-PAY-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-PAY-002</span>
+          <span class="badge">결제관리</span>
+          <span class="badge dashed">REQ-PAY-002</span>
+          <span class="badge">고객 / 업체 관리자</span>
+        </div>
+        <h3>결제 이력 조회</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 마이페이지 &gt; 결제내역(고객) / 메인 &gt; 대시보드 &gt; 결제현황(업체) — 결제 단계별 타임라인·진행률을 보여주는 읽기전용 임베드 컴포넌트를 고객/업체 양쪽 컨텍스트에서 재사용</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>SCR-PAY-001과 동일한 결제 마일스톤 데이터를 읽기 전용 카드(PaymentHistoryCard)로 표시. embed 컨텍스트에 따라 헤더 라벨과 사이드바 메뉴만 "고객 마이페이지/역할:고객" 또는 "업체 대시보드/역할:업체 관리자"로 달라진다.</li>
+      <li>데이터가 없는 경우(빈 상태 데모) 진입 시 카드 영역이 비어 있는 상태로 렌더링된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-pay-002.png" alt="SCR-PAY-002 결제 이력 조회 와이어프레임">
+      <figcaption>SCR-PAY-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>결제 이력 카드 (PaymentHistoryCard, 공용 컴포넌트)</td><td>결제 단계명·금액·상태·입금확인일을 타임라인/리스트 형태로 표시. 편집 컨트롤이 전혀 없는 순수 읽기전용 컴포넌트.</td><td>-</td><td>FUNC-PAY-002-01</td></tr>
+      <tr class="edge"><td class="center">-</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>결제 정보 없음 (빈 상태)</td><td>결제 마일스톤이 하나도 없으면 카드가 빈 상태로 렌더링되고, 하단 상태 영역에 "등록된 결제 정보 없음 — 빈 상태 표시 중"이 표시된다.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>하단 상태(STATUS) 영역</td><td>기본 상태에서는 "읽기 전용 · 결제 정보 수정은 업체 결제 관리 화면(SCR-PAY-001)에서 가능합니다" 고정 안내 노출.</td><td>SCR-PAY-001 (안내 텍스트로 참조)</td><td>-</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>완전 읽기전용</b>: 이 화면에서는 결제 상태를 변경할 수 없으며, 수정은 반드시 SCR-PAY-001(업체 관리자 전용)에서만 가능함을 명시.</li>
+      <li><b>빈 상태(Empty State)</b>: 아직 결제 마일스톤이 등록되지 않은 프로젝트를 위한 전용 빈 화면 문구를 제공.</li>
+      <li>동일 컴포넌트를 고객/업체 두 컨텍스트에 재사용함으로써 <b>데이터 일관성</b>(양쪽에서 동일한 결제 현황을 보게 됨)을 보장한다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PAY-001(결제 단계 등록 및 상태 관리 — 실제 수정), SCR-DASH-002(고객 마이페이지 — 결제 탭으로 임베드).</p>
+  </div>
+  <!-- /SCR-PAY-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.8 알림관리 (SCR-NOTI-001)</h3>
+  <!-- SCR-NOTI-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-NOTI-001</span>
+          <span class="badge">알림관리</span>
+          <span class="badge dashed">REQ-NOTI-001</span>
+          <span class="badge">플랫폼 관리자 / 업체 관리자</span>
+        </div>
+        <h3>알림 발송 관리</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 알림관리 — 이벤트 기반 자동 발송된 알림의 발송이력을 조회/모니터링하고 실패 건을 재발송하는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>이벤트 유형 필터는 "전체", 발송 상태 탭은 "전체(n)"이 기본 선택. 초기 발송 이력 목록이 로드된다.</li>
+      <li>이력이 0건이면 "발송 이력이 없습니다 — 이벤트 발생 시 알림이 자동 발송되며 이곳에 기록됩니다" 빈 상태 화면으로 전체가 대체된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-noti-001.png" alt="SCR-NOTI-001 알림 발송 관리 와이어프레임">
+      <figcaption>SCR-NOTI-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>이벤트 유형 필터 (전체/견적발송/계약승인요청/공정업데이트/결제상태변경)</td><td>드롭다운 선택 시 목록 필터링. 요구사항의 4대 알림 트리거 이벤트와 1:1 대응.</td><td>-</td><td>FUNC-NOTI-001-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>발송 상태 탭 (전체/성공/실패, 건수 표시)</td><td>탭 클릭 시 상태별 필터링.</td><td>-</td><td>FUNC-NOTI-001-02</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>발송 이력 목록 (수신자연락처/템플릿명/이벤트유형/발송시각/상태)</td><td>행(데스크톱) 또는 카드(모바일) 클릭 시 상세 패널을 연다. <b>수신자 연락처는 가운데 자리 마스킹 처리</b>되어 표시(REQ-NFR-007 개인정보 보호).</td><td>-</td><td>FUNC-NOTI-001-02</td></tr>
+      <tr class="edge"><td class="center">③'</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>필터 결과 없음</td><td>선택한 필터 조건에 해당하는 이력이 없으면 "선택한 필터 조건에 해당하는 발송 이력이 없습니다" 안내.</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[재발송] 버튼 (실패 건에만 노출) → 확인 모달</td><td>실패 사유·수신자·템플릿을 보여주는 확인 모달에서 [재발송 실행] 클릭 시 상태가 실패→성공으로 전환되고 발송시각이 현재시각으로 갱신, 성공 토스트 노출.</td><td>-</td><td>FUNC-NOTI-001-02</td></tr>
+      <tr class="happy"><td class="center">⑤</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>상세 패널 (행 클릭)</td><td>수신자·템플릿명·이벤트유형·발송시각·상태와 발송 요청 본문 미리보기를 표시. 실패 건은 실패 사유를 별도로 강조.</td><td>-</td><td>FUNC-NOTI-001-02</td></tr>
+    </table>
+
+    <div class="callout">이 화면은 <b>이력 조회/모니터링 + 실패건 재발송</b>이 핵심 인터랙션이며, 이벤트 발생 시의 실제 알림톡 자동발송(FUNC-NOTI-001-01, 외부 알림 API 연동)은 백엔드 이벤트 트리거로 동작하고 이 화면에는 그 결과만 기록·표시된다.</div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>재발송은 실패 건에만 제공</b>되며, 성공 건에는 재발송 버튼이 노출되지 않는다.</li>
+      <li><b>연락처 마스킹(REQ-NFR-007)</b>: 목록·상세 어디에서도 전체 연락처 원문은 노출하지 않는다.</li>
+      <li><b>빈 상태</b>: 발송 이력이 전무한 경우 전용 안내 화면으로 대체.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-COMP-001(업체 승인 시 알림 트리거), SCR-QUOTE-001(견적발송 시 알림 트리거), SCR-PAY-001(입금 확인 시 알림 트리거) — 3개 화면 모두 이 화면의 알림 이력 데이터를 생성하는 소스.</p>
+  </div>
+  <!-- /SCR-NOTI-001 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.9 대시보드 (SCR-DASH-001 ~ 002)</h3>
+  <!-- SCR-DASH-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-DASH-001</span>
+          <span class="badge">대시보드</span>
+          <span class="badge dashed">REQ-DASH-001</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>업체 대시보드</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 대시보드 (업체관리자 로그인 시 기본 진입 화면) — 진행중 프로젝트·신규 문의·결제 현황 요약과 공정단계별 분포 차트를 보여주는 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>데모 상태 토글이 "진행중 프로젝트 있음"일 때는 요약 카드(4개)·공정단계별 분포 차트·프로젝트 리스트가 표시된다. "신규 업체(빈 상태)" 토글 시 전용 빈 상태 화면으로 전환된다.</li>
+      <li>공정단계 필터는 미선택 상태로 시작(전체 프로젝트 표시).</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-dash-001.png" alt="SCR-DASH-001 업체 대시보드 와이어프레임">
+      <figcaption>SCR-DASH-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:150px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>요약 카드 (Summary Cards, 4열)</td><td>진행중 프로젝트 건수 등 핵심 지표를 카드로 요약.</td><td>-</td><td>FUNC-DASH-001-01</td></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>공정단계별 분포 차트 (StageChart)</td><td>구간(막대/세그먼트) 클릭 시 해당 공정단계로 프로젝트 리스트를 필터링. 다시 클릭하면 필터 해제(토글).</td><td>-</td><td>FUNC-DASH-001-01</td></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>프로젝트 리스트 테이블 (행 클릭)</td><td>차트에서 선택한 단계로 필터링 가능. <b>행 클릭 시 이동 확인 모달 → 확정 시 SCR-PROC-001(공정 관리)로 실제 라우팅</b>(0.5초 지연 후 이동, 토스트로 사전 안내).</td><td><b>SCR-PROC-001 (실제 라우팅)</b></td><td>FUNC-DASH-001-01</td></tr>
+      <tr class="edge"><td class="center">-</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>빈 상태 (신규 업체, 진행 프로젝트 0건)</td><td>요약 카드/차트/리스트 대신 전용 빈 상태 화면이 표시되며, <b>[문의 확인하러 가기] 버튼 클릭 시 SCR-INQ-002(문의 처리 관리)로 실제 라우팅</b>된다.</td><td><b>SCR-INQ-002 (실제 라우팅)</b></td><td>-</td></tr>
+      <tr class="happy"><td class="center">-</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[로그아웃] 버튼 (헤더)</td><td>클릭 시 로그인 화면으로 복귀(목업).</td><td>SCR-AUTH-003</td><td>FUNC-AUTH-002-02</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>빈 상태(신규 업체)</b>: 진행 중인 프로젝트가 없는 신규 가입 업체를 위한 전용 안내와 즉시 행동 가능한 CTA(문의 확인)를 제공한다.</li>
+      <li>본 화면은 요구사항 정의서 3장 User Flow의 <b>실제 라우팅 두 건</b>(→ SCR-PROC-001, → SCR-INQ-002)을 모두 구현하는 핵심 허브 화면이다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-PROC-001(공정 관리 — 실제 라우팅), SCR-INQ-002(문의 처리 관리 — 실제 라우팅, 빈 상태 CTA).</p>
+  </div>
+  <!-- /SCR-DASH-001 -->
+  <!-- SCR-DASH-002 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-DASH-002</span>
+          <span class="badge">대시보드</span>
+          <span class="badge dashed">REQ-DASH-002</span>
+          <span class="badge">인테리어 고객</span>
+        </div>
+        <h3>고객 마이페이지</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 마이페이지 (고객 로그인 시 기본 진입 화면) — 견적·계약·공정·결제·사진을 탭으로 구분해 한 화면에서 조회하는 프로젝트 통합 조회 화면</p>
+      </div>
+    </div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>프로젝트 요약 헤더(업체명·프로젝트명·현재 단계·전체 진행률)와 함께 "견적관리" 탭이 기본 선택되어 SCR-QUOTE-002 견적 데이터가 임베드된다.</li>
+      <li>탭 선택 상태는 가상 URL 해시(<code>/mypage/PRJ-2041#tab=quote</code>)로 표현되어 새로고침 후에도 탭이 유지되는 것처럼 시연한다.</li>
+      <li>데모 상태가 "문의만 등록(빈 상태)"이면 모든 탭이 비활성화되고 전용 안내 화면으로 대체된다.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-dash-002.png" alt="SCR-DASH-002 고객 마이페이지 와이어프레임">
+      <figcaption>SCR-DASH-002 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:130px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">①</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>프로젝트 요약 헤더</td><td>업체명·프로젝트명, 현재 단계 배지, 전체 진행률 프로그레스바(%).</td><td>-</td><td>FUNC-DASH-002-01</td></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>탭 메뉴 (견적관리/계약관리/시공관리/결제관리/사진관리)</td><td>탭 클릭 시 해당 도메인 화면(SCR-QUOTE-002/SCR-CONT-001/SCR-PROC-001/SCR-PAY-002/SCR-PROC-002)의 컴포넌트를 이 화면 안에 임베드하여 표시.</td><td>SCR-QUOTE-002 · SCR-CONT-001 · SCR-PROC-001 · SCR-PAY-002 · SCR-PROC-002 (임베드)</td><td>FUNC-DASH-002-01</td></tr>
+      <tr class="edge"><td class="center">③</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>빈 상태 — [내 문의 상태 확인] 버튼</td><td>아직 견적 발행 전(문의만 등록)이면 모든 탭이 비활성화(클릭 불가)되고 "아직 진행 중인 단계가 아닙니다 — 문의만 등록된 상태입니다" 안내와 함께 문의 상태 확인 버튼만 노출된다.</td><td>SCR-INQ-001 (이동 제안)</td><td>-</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>단계 이전 빈 상태</b>: 업체가 아직 견적을 발행하지 않은 경우 탭 전체를 비활성화하여 존재하지 않는 데이터 조회를 원천 차단.</li>
+      <li>각 탭은 <b>해당 도메인 화면(SCR-QUOTE-002 등)의 컴포넌트를 그대로 재사용/임베드</b>하므로, 그 화면들의 예외 처리 규칙이 이 화면에도 동일하게 적용된다.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-QUOTE-002, SCR-CONT-001, SCR-PROC-001, SCR-PAY-002, SCR-PROC-002 — 5개 탭에 임베드되는 원본 화면.</p>
+  </div>
+  <!-- /SCR-DASH-002 -->
+
+  <h3 class="sub-title" style="font-size:16px;border-left-width:8px;">5.10 확장검토(AI연계) (SCR-EXT-001)</h3>
+  <!-- SCR-EXT-001 -->
+  <div class="screen-block">
+    <div class="screen-head">
+      <div>
+        <div class="badge-row">
+          <span class="badge solid">SCR-EXT-001</span>
+          <span class="badge">확장검토(AI연계)</span>
+          <span class="badge dashed">REQ-EXT-001 · Could</span>
+          <span class="badge">업체 관리자</span>
+        </div>
+        <h3>문의 자동 분류 보조 (확장검토)</h3>
+        <p class="lead" style="margin:2px 0 0;">메뉴 경로: 메인 &gt; 문의관리 &gt; 자동분류 결과 — 규칙/통계 기반(LLM 아님) 자동분류 결과를 확인하고 담당자가 수동 정정할 수 있는 화면</p>
+      </div>
+    </div>
+
+    <div class="callout warn"><b>중요:</b> 본 화면의 "자동 분류"는 문의 텍스트의 공간유형·예산대 키워드를 <b>규칙/통계 기반(특성공학 + 분류 규칙)</b>으로 태깅하는 기능이며, <b>LLM/RAG 등 생성형 AI를 사용하지 않는다</b>(요구사항 제약사항). 화면 상단 "규칙 기반 자동 분류 (Beta)" 배지의 정보 툴팁과 하단 상태바에도 이 사실을 명시해 오해를 방지한다.</div>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">초기 상태 (Initial State)</h4>
+    <ul class="plain">
+      <li>문의 목록에 고객명·문의내용 요약·자동분류 태그(공간유형·예산대)·확신도(상/중/하)·담당자 컬럼이 표시된다. 규칙 관리 모달은 닫힌 상태.</li>
+    </ul>
+
+    <figure class="wf">
+      <img src="assets/scr-ext-001.png" alt="SCR-EXT-001 문의 자동 분류 보조 와이어프레임">
+      <figcaption>SCR-EXT-001 — 데스크톱(1920×1080) / 모바일(360×800) 와이어프레임 (헤드리스 브라우저 실캡처)</figcaption>
+    </figure>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">디스크립션 (UI 요소별 인터랙션 및 로직 정의)</h4>
+    <table class="spec">
+      <tr><th style="width:26px">NO</th><th style="width:82px">구분</th><th style="width:130px">UI 요소명</th><th>인터랙션 및 로직 정의</th><th style="width:110px">이동 화면 / 비고</th><th style="width:80px">매핑 요구사항ID</th></tr>
+      <tr class="happy"><td class="center">②</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>"규칙 기반 자동 분류 (Beta)" 배지 + [i] 정보 버튼</td><td>hover/클릭 시 "본 분류는 키워드 매칭 규칙과 통계 기반으로 동작하며, AI/LLM 모델의 판단이 아닙니다. 결과는 참고용이며 담당자 확인·정정이 필요합니다" 툴팁 노출.</td><td>-</td><td>FUNC-EXT-001-01</td></tr>
+      <tr class="happy"><td class="center">③</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[분류 규칙 관리] 버튼 → 규칙 모달</td><td>클릭 시 현재 적용 중인 키워드→태그 매칭 규칙 목록을 열람하고 규칙을 추가/삭제할 수 있는 모달을 연다.</td><td>-</td><td>FUNC-EXT-001-01</td></tr>
+      <tr class="happy"><td class="center">④</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>자동분류 태그 (공간유형 · 예산대) — ClassifyTag</td><td>태그 클릭 시 분류 근거(매칭된 규칙 ID)를 보여준다.</td><td>-</td><td>FUNC-EXT-001-01</td></tr>
+      <tr class="edge"><td class="center">⑤</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>[✎ 수동 정정] — 태그 값 변경</td><td>담당자가 태그를 직접 다른 값으로 정정 가능. 정정 시 "수동 정정 저장됨 · 규칙 개선 데이터로 수집" 토스트가 뜨고 해당 문의에 "정정됨" 표시가 남는다.</td><td>-</td><td>FUNC-EXT-001-01</td></tr>
+      <tr class="edge"><td class="center">-</td><td class="tag"><span class="tag-badge edge">Edge Case</span></td><td>확신도 "하" / 미분류 태그</td><td>확신도가 낮은 항목은 점선 테두리로 시각적 구분되어 "확인 필요"임을 알리고, 매칭 규칙이 전혀 없으면 "미분류" 상태로 표기된다(범례에 색상 규칙 안내).</td><td>-</td><td>-</td></tr>
+      <tr class="happy"><td class="center">⑫</td><td class="tag"><span class="tag-badge happy">Happy Path</span></td><td>[담당자 배정] 버튼 (행별)</td><td>SCR-INQ-002의 담당자 배정 로직을 재사용하는 버튼(이 화면에서 바로 배정 가능).</td><td>SCR-INQ-002 (로직 재사용)</td><td>-</td></tr>
+    </table>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">예외 처리 및 정책 (Edge Case 상세)</h4>
+    <ul class="plain">
+      <li><b>저확신도/미분류 처리</b>: 확신도 "하" 또는 매칭 규칙이 없는 문의는 시각적으로 구분되어 담당자의 수동 확인을 유도한다(자동 배정으로 이어지지 않음).</li>
+      <li><b>수동 정정 데이터 수집</b>: 담당자의 정정 이력은 향후 규칙 개선에 활용될 데이터로 별도 수집됨을 토스트로 안내.</li>
+      <li>본 기능은 <b>중요도 Could(보류 가능)</b>이며 범위 확정이 필요한 확장검토 항목이다 — 요구사항 정의서 7장 카테고리 커버리지 참고.</li>
+    </ul>
+
+    <h4 style="margin:10px 0 4px;font-size:12.5px;">관련 화면</h4>
+    <p class="lead" style="margin:0;">SCR-INQ-002(문의 처리 관리) — 담당자 배정 로직을 공유하는 상위 화면.</p>
+  </div>
+  <!-- /SCR-EXT-001 -->
+</section>
+
+<!-- ============ 6. APPENDIX ============ -->
+<section class="doc-section">
+  <h2 class="sec-title"><span class="num">06</span> 부록 및 예외 케이스 (Appendix &amp; Exceptions)</h2>
+
+  <h3 class="sub-title">6.1 Happy Path / Edge Case 표기 규칙</h3>
+  <p class="lead">5장 각 화면의 디스크립션 표 "구분" 컬럼은 아래 두 값 중 하나로만 표기하며, 배지 색상으로도 구분한다.</p>
+  <table class="spec">
+    <tr><th style="width:160px">구분</th><th>정의</th><th>예시</th></tr>
+    <tr>
+      <td><span class="tag-badge happy">Happy Path</span></td>
+      <td>사용자가 유효한 입력으로 정상 절차를 따라갈 때의 기본 흐름. 필수값이 올바르게 채워지고, 권한이 있으며, 외부 연동(API/PG/알림)이 정상 응답하는 경우.</td>
+      <td>모든 필수 항목 입력 후 "가입하기" 클릭 → 승인대기 상태 전환</td>
+    </tr>
+    <tr>
+      <td><span class="tag-badge edge">Edge Case</span></td>
+      <td>입력 오류, 권한 부족, 외부 시스템 실패, 상태 충돌, 빈 데이터 등 정상 흐름을 벗어나는 모든 분기. 화면은 반드시 사용자에게 원인과 다음 행동을 안내해야 한다.</td>
+      <td>사업자등록번호 형식 오류, 비밀번호 재설정 링크 30분 만료, 결제 상태 충돌, 네트워크 장애 토스트</td>
+    </tr>
+  </table>
+
+  <h3 class="sub-title">6.2 화면 × 요구사항 추적성 매트릭스 (Cross-Reference)</h3>
+  <p class="lead">요구사항 정의서 4장 "관련 화면 ID" 컬럼(요구사항 → 화면 방향)과 본 문서 5장 각 화면의 "매핑 요구사항ID" 컬럼(화면 → 요구사항 방향)이 아래 표를 통해 양방향으로 교차 참조된다.</p>
+  <table class="matrix">
+    <tr><th>화면 ID</th><th>화면명</th><th>대분류</th><th>매핑 요구사항 ID</th><th>대상 역할</th></tr>
+    <tr><td>SCR-AUTH-001</td><td>업체 관리자 회원가입</td><td>인증/계정관리</td><td>REQ-AUTH-001</td><td>비로그인</td></tr>
+    <tr><td>SCR-AUTH-002</td><td>고객 회원가입</td><td>인증/계정관리</td><td>REQ-AUTH-001</td><td>비로그인</td></tr>
+    <tr><td>SCR-AUTH-003</td><td>로그인 / 로그아웃</td><td>인증/계정관리</td><td>REQ-AUTH-002</td><td>전체</td></tr>
+    <tr><td>SCR-AUTH-004</td><td>비밀번호 재설정 / 변경</td><td>인증/계정관리</td><td>REQ-AUTH-003</td><td>전체</td></tr>
+    <tr><td>SCR-AUTH-005</td><td>역할기반 접근권한(RBAC) 관리</td><td>인증/계정관리</td><td>REQ-AUTH-004 (REQ-NFR-002)</td><td>플랫폼 관리자</td></tr>
+    <tr><td>SCR-COMP-001</td><td>업체 등록 및 승인 관리</td><td>업체관리</td><td>REQ-COMP-001</td><td>플랫폼 관리자</td></tr>
+    <tr><td>SCR-COMP-002</td><td>소속 직원(현장담당자) 관리</td><td>업체관리</td><td>REQ-COMP-002</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-INQ-001</td><td>시공 문의 등록</td><td>고객문의관리</td><td>REQ-INQ-001</td><td>인테리어 고객</td></tr>
+    <tr><td>SCR-INQ-002</td><td>문의 처리 관리</td><td>고객문의관리</td><td>REQ-INQ-002</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-QUOTE-001</td><td>견적서 작성</td><td>견적관리</td><td>REQ-QUOTE-001</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-QUOTE-002</td><td>견적 승인 프로세스</td><td>견적관리</td><td>REQ-QUOTE-002</td><td>고객 / 업체 관리자(읽기전용)</td></tr>
+    <tr><td>SCR-CONT-001</td><td>계약서 생성/관리</td><td>계약관리</td><td>REQ-CONT-001</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-PROC-001</td><td>공정 관리</td><td>시공관리</td><td>REQ-PROC-001</td><td>현장 담당자</td></tr>
+    <tr><td>SCR-PROC-002</td><td>시공 사진 관리</td><td>시공관리</td><td>REQ-PROC-002</td><td>현장 담당자 / 고객</td></tr>
+    <tr><td>SCR-PAY-001</td><td>결제 단계 등록 및 상태 관리</td><td>결제관리</td><td>REQ-PAY-001 (REQ-NFR-009)</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-PAY-002</td><td>결제 이력 조회</td><td>결제관리</td><td>REQ-PAY-002</td><td>고객 / 업체 관리자</td></tr>
+    <tr><td>SCR-NOTI-001</td><td>알림 발송 관리</td><td>알림관리</td><td>REQ-NOTI-001</td><td>플랫폼 관리자 / 업체 관리자</td></tr>
+    <tr><td>SCR-DASH-001</td><td>업체 대시보드</td><td>대시보드</td><td>REQ-DASH-001</td><td>업체 관리자</td></tr>
+    <tr><td>SCR-DASH-002</td><td>고객 마이페이지</td><td>대시보드</td><td>REQ-DASH-002</td><td>인테리어 고객</td></tr>
+    <tr><td>SCR-EXT-001</td><td>문의 자동 분류 보조</td><td>확장검토(AI연계)</td><td>REQ-EXT-001</td><td>업체 관리자</td></tr>
+  </table>
+  <div class="callout">합계: 요구사항 10개 대분류 · 기능요구사항 24건 · 화면(SCR-*) 20개 — 요구사항 정의서 7장 "카테고리 커버리지 점검" 및 "관련 화면 수 총계: 20개"와 일치.</div>
+
+  <h3 class="sub-title">6.3 보안 요구사항 이중검증 체크리스트 (프론트엔드 / 백엔드)</h3>
+  <p class="lead">요구사항 정의서 부록 A를 그대로 재게재한다. 보안 관련 요구사항은 프론트엔드·백엔드 양쪽 검증 조건을 모두 충족해야 완료로 간주하며, 백엔드 검증 누락 시 미충족으로 처리한다.</p>
+  <table class="spec">
+    <tr><th style="width:170px">요구사항 ID</th><th>프론트엔드 검증 조건</th><th>백엔드 검증 조건</th></tr>
+    <tr><td>REQ-AUTH-004 / REQ-NFR-002</td><td>로그인 상태와 역할 정보에 따라 메뉴·버튼 노출을 역할별로 구성한다 (SCR-AUTH-005에서 설정)</td><td>모든 API 요청에서 JWT를 검증하고 역할별 접근범위를 서버 측에서 재확인한다</td></tr>
+    <tr><td>REQ-NFR-001</td><td>비밀번호 입력 시 최소 길이·조합 규칙을 클라이언트에서 안내한다 (SCR-AUTH-001/002/004)</td><td>저장 시 BCrypt로 해시 처리하여 저장한다</td></tr>
+    <tr><td>REQ-NFR-009</td><td>카드번호 입력은 PG사가 제공하는 위젯을 통해 PG사 서버로 직접 전달되도록 구성한다 (SCR-PAY-001)</td><td>PG사로부터 수신한 거래 토큰과 결제 결과만 저장하도록 구현한다</td></tr>
+  </table>
+
+  <h3 class="sub-title">6.4 제외·보류된 요구사항 근거 (요구사항 정의서 6장 변경이력 재게재)</h3>
+  <table class="spec">
+    <tr><th style="width:60px">버전</th><th style="width:90px">개정일</th><th style="width:120px">대상 요구사항ID</th><th>변경 내용 및 근거</th></tr>
+    <tr><td>v1.0</td><td>2026-08-18</td><td>전체</td><td>최초 작성 — 초기 서비스 목적 정의</td></tr>
+    <tr><td>v1.1</td><td>2026-08-18</td><td>REQ-DASH-002</td><td>관련 화면 ID 변경: SCR-DASH-001 → SCR-DASH-002 (신규 채번). 업체 대시보드(REQ-DASH-001, 업체관리자 대상)와 고객 마이페이지(REQ-DASH-002, 고객 대상)가 사용자·목적이 다른데도 동일 SCR ID를 공유해 화면ID 1:1 매핑 원칙 위반으로 판정, 화면 ID를 분리 채번함</td></tr>
+  </table>
+  <ul class="plain">
+    <li><b>REQ-CONT-001-03 전자서명 연동</b> — 중요도 Could, 난이도 상. 외부 전자서명 서비스 연동은 학습 범위 외로 보류하고, SCR-CONT-001에서는 서명 여부 체크(mock)로 대체 구현.</li>
+    <li><b>REQ-PAY-001-02 PG 자동연동</b> — 결제 상태 전환은 PG 자동연동 이전까지 업체 관리자의 수동 확인 방식(입금 확인 버튼)으로 대체.</li>
+    <li><b>REQ-EXT-001 문의 자동 분류</b> — 중요도 Could. LLM/RAG를 사용하지 않고 특성공학+분류 규칙(통계 기반)으로 범위를 한정. SCR-EXT-001은 AI가 아닌 규칙 기반 보조 기능임을 명확히 한다.</li>
+  </ul>
+
+  <h3 class="sub-title">6.5 용어 정의</h3>
+  <table class="spec">
+    <tr><th style="width:140px">용어</th><th>정의</th></tr>
+    <tr><td>SCR-ID</td><td>화면 설계서의 화면 식별자. <code>SCR-{대분류코드}-{일련번호}</code></td></tr>
+    <tr><td>REQ-ID / FUNC-ID</td><td>요구사항 정의서의 요구사항/기능 식별자. FUNC은 REQ 하위에 종속</td></tr>
+    <tr><td>Happy Path</td><td>정상 입력·정상 권한·정상 외부연동 하에서의 기본 성공 흐름 (6.1 참조)</td></tr>
+    <tr><td>Edge Case</td><td>입력 오류·권한 부족·외부 실패·상태 충돌 등 정상 흐름 이탈 분기 (6.1 참조)</td></tr>
+    <tr><td>이동 화면(제안)</td><td>실제 라우팅으로 구현되지 않았으나 화면 하단 "관련 화면 바로가기" 패널을 통해 이동 가능하도록 설계 의도를 명시한 연결</td></tr>
+    <tr><td>와이어프레임 캡처(CAPTURE_MODE)</td><td>본 문서용 스크린샷을 뜨는 동안, 콘텐츠가 프레임 높이를 넘는 경우에도 잘리지 않도록 <code>components/frame/device-preview.tsx</code>의 프레임을 일시적으로 자동 높이(auto)로 렌더링한 촬영 모드. 실서비스 코드는 고정 뷰포트 + 스크롤(overflow-y-auto)로 복원되어 있다.</td></tr>
+  </table>
+</section>
+
+</body>
+</html>
