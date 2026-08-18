@@ -1,15 +1,13 @@
 "use client"
 
 import { InquiryForm } from "./inquiry-form"
+import { CUSTOMER_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
-const MENU = [
-  { label: "대시보드", code: "SCR-DASH-002" },
-  { label: "시공 문의 등록", code: "SCR-INQ-001", active: true },
-  { label: "내 문의 내역", code: "SCR-INQ-LIST" },
-  { label: "견적 비교", code: "SCR-EST" },
-  { label: "시공 진행현황", code: "SCR-PRG" },
-  { label: "리뷰 관리", code: "SCR-REV" },
-]
+const MENU = CUSTOMER_MENU.map((label) => ({
+  label,
+  code: label === MENU_LABEL.inquiry ? "SCR-INQ-001" : `MENU-${label}`,
+  active: label === MENU_LABEL.inquiry,
+}))
 
 export function InquiryScreen({ mode }: { mode: "desktop" | "mobile" }) {
   const isMobile = mode === "mobile"
@@ -55,7 +53,7 @@ export function InquiryScreen({ mode }: { mode: "desktop" | "mobile" }) {
         ) : (
           <aside className="w-52 shrink-0 border-r border-foreground/40 p-3">
             <p className="mb-2 px-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              고객 메뉴
+              고객 · 플랫폼 메뉴
             </p>
             <ul className="flex flex-col gap-1">
               {MENU.map((m) => (

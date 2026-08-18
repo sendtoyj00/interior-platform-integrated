@@ -25,7 +25,7 @@ export function DesktopPreview({
   return (
     <div className="inline-flex flex-col gap-2">
       <div
-        className="overflow-hidden rounded-lg border-2 border-foreground/70 bg-background shadow-sm"
+        className="wireframe-preview overflow-hidden rounded-lg border-2 border-foreground/70 bg-background shadow-sm"
         style={{ width: DESKTOP_W * scale, height: (DESKTOP_H + 40) * scale }}
       >
         <div
@@ -43,6 +43,7 @@ export function DesktopPreview({
             <span className="ml-3 flex-1 truncate rounded border border-foreground/30 bg-background px-3 py-1 font-mono text-[13px] text-muted-foreground">
               {url}
             </span>
+            <span className="border border-foreground px-2 py-1 font-mono text-[10px] font-bold text-foreground">와이어프레임</span>
           </div>
           <div style={{ height: DESKTOP_H }} className="relative overflow-hidden bg-background">
             {children}
@@ -57,7 +58,7 @@ export function MobilePreview({ children }: { children: ReactNode }) {
   return (
     <div className="inline-flex flex-col gap-2">
       <div
-        className="overflow-hidden rounded-[2rem] border-4 border-foreground/80 bg-background shadow-sm"
+        className="wireframe-preview overflow-hidden rounded-[2rem] border-4 border-foreground/80 bg-background shadow-sm"
         style={{ width: MOBILE_W + 8, height: MOBILE_H + 8 }}
       >
         <div className="flex items-center justify-center border-b border-foreground/20 bg-muted py-2">
@@ -108,6 +109,7 @@ function FrameLabel({ title, spec }: { title: string; spec: string }) {
         {title}
       </span>
       <span className="font-mono text-[11px] text-muted-foreground">{spec}</span>
+      <span className="rounded border border-foreground/50 bg-background px-1.5 py-0.5 text-[10px] font-semibold text-foreground">화면 와이어프레임</span>
     </div>
   )
 }

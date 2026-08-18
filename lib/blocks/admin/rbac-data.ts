@@ -30,26 +30,26 @@ export interface ApiScope {
 export const MENU_ACCESS: Record<RoleKey, MenuAccess[]> = {
   company_admin: [
     { menu: "대시보드", screenId: "SCR-DASH-001", allowed: true },
-    { menu: "프로젝트 관리", screenId: "SCR-PROJ-001", allowed: true },
-    { menu: "견적/계약", screenId: "SCR-EST-001", allowed: true },
-    { menu: "현장 배정", screenId: "SCR-SITE-001", allowed: true },
-    { menu: "정산 관리", screenId: "SCR-PAY-001", allowed: false },
+    { menu: "시공관리", screenId: "SCR-PROC-001", allowed: true },
+    { menu: "견적관리", screenId: "SCR-QUOTE-001", allowed: true },
+    { menu: "직원관리", screenId: "SCR-COMP-002", allowed: true },
+    { menu: "결제관리", screenId: "SCR-PAY-001", allowed: false },
     { menu: "사용자 관리", screenId: "SCR-USER-001", allowed: true },
   ],
   site_manager: [
     { menu: "대시보드", screenId: "SCR-DASH-001", allowed: true },
-    { menu: "프로젝트 관리", screenId: "SCR-PROJ-001", allowed: true },
+    { menu: "시공관리", screenId: "SCR-PROC-001", allowed: true },
     { menu: "현장 일정", screenId: "SCR-SCHE-001", allowed: true },
     { menu: "작업 보고", screenId: "SCR-RPT-001", allowed: true },
-    { menu: "견적/계약", screenId: "SCR-EST-001", allowed: false },
+    { menu: "견적관리", screenId: "SCR-QUOTE-001", allowed: false },
     { menu: "정산 관리", screenId: "SCR-PAY-001", allowed: false },
   ],
   customer: [
     { menu: "내 프로젝트", screenId: "SCR-MYPJ-001", allowed: true },
-    { menu: "견적 조회", screenId: "SCR-EST-002", allowed: true },
+    { menu: "견적관리", screenId: "SCR-QUOTE-002", allowed: true },
     { menu: "진행 현황", screenId: "SCR-PROG-001", allowed: true },
     { menu: "메시지", screenId: "SCR-MSG-001", allowed: true },
-    { menu: "결제 내역", screenId: "SCR-PAY-002", allowed: false },
+    { menu: "결제관리", screenId: "SCR-PAY-002", allowed: false },
   ],
   platform_admin: [
     { menu: "대시보드", screenId: "SCR-DASH-001", allowed: true },
@@ -96,7 +96,7 @@ export interface AuditLog {
 }
 
 export const AUDIT_LOGS: AuditLog[] = [
-  { actor: "admin@platform.co", at: "2026-08-18 14:22:10", change: "업체관리자 · 정산 관리(SCR-PAY-001) 접근 허용 → 차단" },
+  { actor: "admin@platform.co", at: "2026-08-18 14:22:10", change: "업체 관리자 · 결제관리(SCR-PAY-001) 접근 허용 → 차단" },
   { actor: "admin@platform.co", at: "2026-08-17 09:05:41", change: "현장담당자 · 작업 보고(SCR-RPT-001) 접근 차단 → 허용" },
-  { actor: "root@platform.co", at: "2026-08-15 18:47:03", change: "고객 · 결제 내역(SCR-PAY-002) 접근 허용 → 차단" },
+  { actor: "root@platform.co", at: "2026-08-15 18:47:03", change: "고객 · 결제관리(SCR-PAY-002) 접근 허용 → 차단" },
 ]

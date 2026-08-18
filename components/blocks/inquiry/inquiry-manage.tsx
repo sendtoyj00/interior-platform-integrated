@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Marker } from "./marker"
+import { COMPANY_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
 type Status = "신규" | "상담중" | "견적발송" | "종료"
 
@@ -212,7 +213,7 @@ export function InquiryManage({ mode }: { mode: "desktop" | "mobile" }) {
         ) : (
           <aside className="w-52 shrink-0 border-r border-foreground/40 p-3">
             <p className="mb-2 px-1 text-[10px] uppercase tracking-wide text-muted-foreground">
-              업체 관리자 메뉴
+              업체 관리자 · 플랫폼 메뉴
             </p>
             <ul className="flex flex-col gap-1">
               {MENU.map((m) => (
@@ -241,7 +242,7 @@ export function InquiryManage({ mode }: { mode: "desktop" | "mobile" }) {
         <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
           <div className="border-b border-foreground/30 px-4 pb-3 pt-4">
             <p className="text-[11px] text-muted-foreground">SCR-INQ-002</p>
-            <h1 className="text-lg font-bold text-foreground">문의 처리 관리</h1>
+            <h1 className="text-lg font-bold text-foreground">문의관리 · 문의 처리</h1>
           </div>
 
           {/* ① 상태 필터 탭 */}
@@ -500,11 +501,8 @@ function Row({ label, value }: { label: string; value: string }) {
   )
 }
 
-const MENU = [
-  { label: "대시보드", code: "SCR-DASH-001" },
-  { label: "문의 처리 관리", code: "SCR-INQ-002", active: true },
-  { label: "견적 관리", code: "SCR-QUOTE-001" },
-  { label: "시공 일정", code: "SCR-SCHED" },
-  { label: "직원 관리", code: "SCR-STAFF" },
-  { label: "리뷰 관리", code: "SCR-REV" },
-]
+const MENU = COMPANY_MENU.map((label) => ({
+  label,
+  code: label === MENU_LABEL.inquiry ? "SCR-INQ-002" : `MENU-${label}`,
+  active: label === MENU_LABEL.inquiry,
+}))

@@ -163,3 +163,17 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 모든 화면 프리뷰의 세부 조작 요소를 와이어프레임에서도 즉시 식별할 수 있게 한다. */
+.wireframe-preview button:not(:disabled),
+.wireframe-preview [role="button"] {
+  outline: 1px solid color-mix(in oklch, var(--foreground) 65%, transparent);
+  outline-offset: -1px;
+  font-weight: 650;
+}
+
+.wireframe-preview button:not(:disabled):focus-visible,
+.wireframe-preview [role="button"]:focus-visible {
+  outline: 3px solid var(--foreground);
+  outline-offset: 2px;
+}

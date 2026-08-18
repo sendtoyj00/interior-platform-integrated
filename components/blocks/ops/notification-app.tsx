@@ -11,6 +11,7 @@ import {
   type NotifStatus,
 } from "@/lib/blocks/ops/notification-mock"
 import { Num } from "./num"
+import { COMPANY_MENU, MENU_LABEL } from "@/lib/menu-labels"
 
 type Device = "desktop" | "mobile"
 type EventFilter = "all" | NotifEventType
@@ -77,15 +78,8 @@ export function NotificationApp({
   const resendTarget = logs.find((l) => l.id === resendId) ?? null
 
   const roleLabel = "업체 관리자"
-  const menuItems = [
-    "대시보드",
-    "프로젝트 관리",
-    "결제 마일스톤",
-    "알림 발송이력",
-    "견적/계약",
-    "고객 관리",
-  ]
-  const activeMenu = "알림 발송이력"
+  const menuItems = COMPANY_MENU
+  const activeMenu = MENU_LABEL.notification
 
   const successCount = logs.filter((l) => l.status === "success").length
   const failCount = logs.filter((l) => l.status === "fail").length
@@ -122,7 +116,7 @@ export function NotificationApp({
           <div className="relative">
             <Num n={7} />
             <p className="mb-2 px-1 text-[11px] font-bold text-muted-foreground">
-              업체 관리자 메뉴
+              업체 관리자 · 플랫폼 메뉴
             </p>
           </div>
           <nav
@@ -152,7 +146,7 @@ export function NotificationApp({
         {/* ===== BODY ===== */}
         <main className="flex-1 p-4">
           <div className="mb-3">
-            <h2 className="text-base font-bold">알림 발송이력 조회</h2>
+            <h2 className="text-base font-bold">알림관리 · 발송 이력 조회</h2>
             <p className="text-xs text-muted-foreground">
               실제 발송은 이벤트 기반 자동 트리거 · 본 화면은 조회/모니터링 전용
             </p>

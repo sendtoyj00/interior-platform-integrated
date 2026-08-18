@@ -15,6 +15,7 @@ import {
   type Photo,
 } from "@/lib/blocks/ops/mock"
 import { Num } from "./num"
+import { MENU_LABEL } from "@/lib/menu-labels"
 
 type Mode = "A" | "B"
 type Device = "desktop" | "mobile"
@@ -171,9 +172,9 @@ export function PhotoApp({ device, mode }: { device: Device; mode: Mode }) {
   const roleLabel = mode === "A" ? "현장담당자" : "고객"
   const menuItems =
     mode === "A"
-      ? ["대시보드", "공정 관리", "사진 업로드", "일정", "자재 발주"]
-      : ["프로젝트 현황", "시공 사진", "일정 보기", "문의하기"]
-  const activeMenu = mode === "A" ? "사진 업로드" : "시공 사진"
+      ? [MENU_LABEL.dashboard, MENU_LABEL.process, MENU_LABEL.photo]
+      : [MENU_LABEL.mypage, MENU_LABEL.photo, MENU_LABEL.inquiry]
+  const activeMenu = MENU_LABEL.photo
 
   const box =
     "relative border border-foreground/40 bg-background"

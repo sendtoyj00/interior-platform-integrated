@@ -23,7 +23,10 @@ export function ScreenPageChrome({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="font-mono text-[11px] text-muted-foreground">{meta.screenPath}</p>
+        <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-muted-foreground">
+          <span>메뉴 경로: {meta.screenPath}</span>
+          <span className="border border-foreground/50 bg-background px-1.5 py-0.5 font-bold text-foreground">화면 명칭: {meta.title}</span>
+        </div>
         <div className="mt-1 flex flex-wrap items-center gap-2">
           <span className="rounded border border-foreground bg-foreground px-2 py-0.5 font-mono text-[11px] font-bold text-background">
             {meta.scrId}
