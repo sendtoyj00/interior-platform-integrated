@@ -1,0 +1,439 @@
+// 인테리어 견적·시공관리 플랫폼 — DB ERD
+// 대상: docs/screen-spec (20개 SCR 화면) + lib/blocks/** 목업 데이터 기반 설계
+// 사용법: 전체 내용을 https://dbdiagram.io/d 에 붙여넣으면 다이어그램으로 렌더링됩니다.
+
+Project interior_platform {
+  database_type: 'PostgreSQL'
+  note: '인테리어 견적·시공관리 플랫폼 데이터 모델 (화면 설계서 v0 기준)'
+}
+
+//////////////////// Enums ////////////////////
+
+Enum role_key {
+  guest [note: '비로그인 (테이블에는 저장되지 않음, 화면 접근권한 표기용)']
+  company_admin [note: '업체관리자']
+  site_manager [note: '현장담당자 (화면 설계서 내 field_staff와 동일 역할)']
+  customer [note: '고객']
+  platform_admin [note: '플랫폼관리자']
+}
+
+Enum vendor_status {
+  pending
+  approved
+  rejected
+}
+
+Enum staff_status {
+  invited
+  active
+}
+
+Enum inquiry_status {
+  received
+  assigned
+  quoted
+  closed
+}
+
+Enum confidence_level {
+  "상"
+  "중"
+  "하"
+}
+
+Enum classify_rule_type {
+  "공간유형"
+  "예산대"
+}
+
+Enum project_stage {
+  contract [note: '계약·실측']
+  demolition [note: '철거·설비']
+  framing [note: '목공·전기']
+  finishing [note: '마감·도장']
+  handover [note: '준공·검수']
+}
+
+Enum quote_status {
+  pending
+  approved
+  rejected
+}
+
+Enum contract_status {
+  waiting [note: '계약대기']
+  signed [note: '체결']
+  completed [note: '완료']
+}
+
+Enum process_status {
+  todo [note: '예정']
+  doing [note: '진행중']
+  done [note: '완료']
+}
+
+Enum milestone_status {
+  pending
+  done
+}
+
+Enum notif_event_type {
+  quote [note: '견적발송']
+  contract [note: '계약승인요청']
+  progress [note: '공정업데이트']
+  payment [note: '결제상태변경']
+}
+
+Enum notif_status {
+  success
+  fail
+}
+
+//////////////////// AUTH / RBAC (SCR-AUTH-*) ////////////////////
+
+Table roles {
+  key role_key [pk]
+  label varchar [not null]
+  locked boolean [not null, default: false, note: '플랫폼관리자 등 수정 불가 역할']
+}
+
+Table users {
+  id varchar [pk]
+  email varchar [not null, unique]
+  password_hash varchar [not null]
+  name varchar [not null]
+  phone varchar
+  role_key role_key [not null, ref: > roles.key]
+  status varchar [not null, default: 'active', note: 'active | suspended']
+  created_at timestamp [not null, default: `now()`]
+  updated_at timestamp
+
+  note: '전체 로그인 사용자 (업체관리자/현장담당자는 vendor_staff로 소속 업체와 연결)'
+}
+
+Table role_menu_access {
+  id integer [pk, increment]
+  role_key role_key [not null, ref: > roles.key]
+  menu varchar [not null]
+  screen_id varchar [not null, note: '예: SCR-DASH-001']
+  allowed boolean [not null]
+
+  indexes {
+    (role_key, screen_id) [unique]
+  }
+
+  note: 'SCR-AUTH-005 역할별 메뉴 접근권한 토글'
+}
+
+Table role_api_scope {
+  id integer [pk, increment]
+  role_key role_key [not null, ref: > roles.key]
+  path varchar [not null, note: '예: /api/v1/projects, /api/v1/**']
+  method varchar [not null, note: 'GET | POST | PUT | DELETE']
+  allowed boolean [not null]
+
+  note: 'SCR-AUTH-005 API 접근범위 (읽기전용 표시)'
+}
+
+Table audit_logs {
+  id integer [pk, increment]
+  actor_user_id varchar [ref: > users.id]
+  actor_label varchar [note: '탈퇴/시스템 계정 대비 스냅샷, 예: admin@platform.co']
+  at timestamp [not null]
+  change varchar [not null]
+
+  note: 'SCR-AUTH-005 감사로그'
+}
+
+//////////////////// 업체관리 (SCR-COMP-*) ////////////////////
+
+Table vendors {
+  id varchar [pk]
+  name varchar [not null, note: '상호명']
+  biz_no varchar [not null, unique, note: '사업자등록번호']
+  ceo varchar [not null, note: '대표자명']
+  biz_type varchar [note: '업태/종목']
+  address varchar [note: '사업장 주소']
+  contact varchar [note: '담당자 연락처']
+  manager_name varchar [note: '담당자명']
+  email varchar
+  intro text
+  logo_url varchar
+  status vendor_status [not null, default: 'pending']
+  applied_at timestamp [not null]
+  processed_at timestamp
+  processed_by varchar [ref: > users.id, note: '승인/반려 처리한 플랫폼관리자']
+  reject_reason text
+
+  note: 'SCR-COMP-001 업체 가입 승인 관리'
+}
+
+Table vendor_staff {
+  id varchar [pk]
+  vendor_id varchar [not null, ref: > vendors.id]
+  user_id varchar [ref: > users.id, note: 'invited 상태에서는 아직 계정 미생성일 수 있어 nullable']
+  name varchar [not null]
+  email varchar [not null]
+  role_key role_key [not null, note: 'company_admin | site_manager']
+  status staff_status [not null, default: 'invited']
+  invited_at timestamp [not null, default: `now()`]
+
+  note: 'SCR-COMP-002 소속 직원(현장담당자) 관리'
+}
+
+Table project_staff_assignments {
+  project_id varchar [not null, ref: > projects.id]
+  staff_id varchar [not null, ref: > vendor_staff.id]
+  assigned_at timestamp [not null, default: `now()`]
+
+  indexes {
+    (project_id, staff_id) [pk]
+  }
+
+  note: '현장담당자 ↔ 프로젝트 배정 (SCR-COMP-002 assignedProjectIds)'
+}
+
+//////////////////// 문의관리 (SCR-INQ-*) + 확장검토 (SCR-EXT-001) ////////////////////
+
+Table inquiries {
+  id varchar [pk]
+  customer_id varchar [not null, ref: > users.id]
+  vendor_id varchar [ref: > vendors.id, note: 'SCR-INQ-001에서 고객이 선택한 업체']
+  summary text [not null]
+  desired_schedule varchar
+  space_tag varchar [note: '자동/수동 분류된 공간유형 태그, null=미분류']
+  budget_tag varchar [note: '자동/수동 분류된 예산대 태그, null=미분류']
+  confidence confidence_level [note: '자동분류 신뢰도']
+  corrected boolean [not null, default: false, note: '담당자가 자동분류 결과를 수동 정정했는지 여부']
+  status inquiry_status [not null, default: 'received']
+  assignee_staff_id varchar [ref: > vendor_staff.id, note: 'SCR-INQ-002 담당자 배정']
+  created_at timestamp [not null, default: `now()`]
+
+  note: 'SCR-INQ-001 등록 / SCR-INQ-002 처리 관리'
+}
+
+Table classify_rules {
+  id varchar [pk]
+  keyword varchar [not null]
+  tag varchar [not null]
+  type classify_rule_type [not null]
+
+  note: 'SCR-EXT-001 규칙/통계 기반 자동분류 규칙 (LLM 아님)'
+}
+
+Table inquiry_rule_matches {
+  inquiry_id varchar [not null, ref: > inquiries.id]
+  rule_id varchar [not null, ref: > classify_rules.id]
+  rule_kind classify_rule_type [not null]
+
+  indexes {
+    (inquiry_id, rule_id, rule_kind) [pk]
+  }
+
+  note: '문의 1건에 매칭된 자동분류 규칙 이력 (spaceRules/budgetRules)'
+}
+
+//////////////////// 프로젝트 (공통 축) ////////////////////
+
+Table projects {
+  id varchar [pk]
+  inquiry_id varchar [ref: > inquiries.id, note: '문의 → 견적승인 → 프로젝트 전환']
+  vendor_id varchar [not null, ref: > vendors.id]
+  customer_id varchar [not null, ref: > users.id]
+  name varchar [not null]
+  site_address varchar
+  stage project_stage [not null, default: 'contract']
+  progress integer [not null, default: 0, note: '0~100']
+  start_date date
+  updated_at timestamp [not null, default: `now()`]
+
+  note: '견적/계약/공정/결제/알림이 모두 참조하는 중심 엔티티'
+}
+
+//////////////////// 견적관리 (SCR-QUOTE-*) ////////////////////
+
+Table quotes {
+  id varchar [pk]
+  quote_no varchar [not null, unique]
+  project_id varchar [not null, ref: > projects.id]
+  status quote_status [not null, default: 'pending']
+  issued_at timestamp [not null]
+  valid_until date
+  current_total integer [not null, default: 0, note: '최신 버전 합계액 (비정규화 캐시)']
+
+  note: 'SCR-QUOTE-001 작성 / SCR-QUOTE-002 승인 프로세스'
+}
+
+Table quote_versions {
+  id varchar [pk]
+  quote_id varchar [not null, ref: > quotes.id]
+  version varchar [not null, note: '예: v1.0, v1.1']
+  updated_at timestamp [not null]
+  updated_by varchar [ref: > users.id]
+  summary varchar [note: '변경 요약, 예: 도배 단가 조정']
+  total integer [not null]
+
+  indexes {
+    (quote_id, version) [unique]
+  }
+
+  note: 'SCR-QUOTE-002 견적 수정이력'
+}
+
+Table quote_line_items {
+  id varchar [pk]
+  quote_version_id varchar [not null, ref: > quote_versions.id]
+  name varchar [not null]
+  spec varchar
+  qty integer [not null]
+  unit_price integer [not null]
+}
+
+//////////////////// 계약관리 (SCR-CONT-*) ////////////////////
+
+Table contracts {
+  id varchar [pk]
+  contract_no varchar [not null, unique]
+  project_id varchar [not null, ref: > projects.id]
+  quote_id varchar [ref: > quotes.id, note: '승인된 견적 기반 생성']
+  vendor_id varchar [not null, ref: > vendors.id]
+  customer_id varchar [not null, ref: > users.id]
+  status contract_status [not null, default: 'waiting']
+  amount integer [not null]
+  period_start date
+  period_end date
+  signed_at timestamp
+  down_payment_memo varchar
+  created_at timestamp [not null, default: `now()`]
+
+  note: 'SCR-CONT-001 계약서 생성/관리'
+}
+
+Table contract_history {
+  id varchar [pk]
+  contract_id varchar [not null, ref: > contracts.id]
+  changed_by varchar [ref: > users.id]
+  changed_at timestamp [not null]
+  from_status contract_status
+  to_status contract_status [not null]
+}
+
+//////////////////// 시공관리 (SCR-PROC-*) ////////////////////
+
+Table process_templates {
+  id varchar [pk]
+  vendor_id varchar [ref: > vendors.id, note: 'null = 플랫폼 공용 표준 템플릿']
+  name varchar [not null]
+  default_due_offset_days integer [note: '착공일 기준 기본 마감 오프셋']
+  sort_order integer [not null, default: 0]
+
+  note: 'SCR-PROC-001 ① 공정 템플릿'
+}
+
+Table process_steps {
+  id varchar [pk]
+  project_id varchar [not null, ref: > projects.id]
+  template_id varchar [ref: > process_templates.id]
+  name varchar [not null]
+  progress integer [not null, default: 0, note: '0~100']
+  due_date date
+  status process_status [not null, default: 'todo']
+  delayed boolean [not null, default: false]
+  delay_reason varchar
+  delay_duration varchar
+  sort_order integer [not null, default: 0]
+
+  note: 'SCR-PROC-001 프로젝트별 공정 진행 상태'
+}
+
+Table process_photos {
+  id varchar [pk]
+  process_step_id varchar [not null, ref: > process_steps.id]
+  project_id varchar [not null, ref: > projects.id]
+  image_url varchar [not null]
+  taken_at timestamp [not null]
+  memo varchar
+  uploaded_by varchar [ref: > users.id]
+
+  note: 'SCR-PROC-002 시공 사진 관리 (업로드/고객 갤러리 공용)'
+}
+
+//////////////////// 결제관리 (SCR-PAY-*) ////////////////////
+
+Table payment_milestones {
+  id varchar [pk]
+  project_id varchar [not null, ref: > projects.id]
+  name varchar [not null, note: '계약금 | 중도금 1차 | 잔금 등']
+  amount integer [not null]
+  due_date date
+  status milestone_status [not null, default: 'pending']
+  confirmed_date date
+  memo varchar
+  sort_order integer [not null, default: 0]
+
+  note: 'SCR-PAY-001 등록/상태관리, SCR-PAY-002 이력 조회'
+}
+
+//////////////////// 알림관리 (SCR-NOTI-001) ////////////////////
+
+Table notification_logs {
+  id varchar [pk]
+  user_id varchar [ref: > users.id, note: '수신자, 비회원 발송 대비 nullable']
+  project_id varchar [ref: > projects.id, note: '이벤트 발생 컨텍스트']
+  phone varchar [not null, note: '원본 번호. 화면 표시는 항상 마스킹(REQ-NFR-007)']
+  event_type notif_event_type [not null]
+  template varchar [not null]
+  body text [not null]
+  status notif_status [not null]
+  fail_reason varchar
+  sent_at timestamp [not null]
+
+  note: 'SCR-NOTI-001 이벤트 기반 자동 발송 이력 / 실패 재발송'
+}
+
+//////////////////// Table Groups (화면 카테고리 기준) ////////////////////
+
+TableGroup auth_rbac {
+  roles
+  users
+  role_menu_access
+  role_api_scope
+  audit_logs
+}
+
+TableGroup company {
+  vendors
+  vendor_staff
+  project_staff_assignments
+}
+
+TableGroup inquiry {
+  inquiries
+  classify_rules
+  inquiry_rule_matches
+}
+
+TableGroup quote {
+  quotes
+  quote_versions
+  quote_line_items
+}
+
+TableGroup contract {
+  contracts
+  contract_history
+}
+
+TableGroup process {
+  process_templates
+  process_steps
+  process_photos
+}
+
+TableGroup payment {
+  payment_milestones
+}
+
+TableGroup notification {
+  notification_logs
+}

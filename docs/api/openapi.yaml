@@ -1,0 +1,1872 @@
+openapi: 3.0.3
+info:
+  title: 인테리어 견적·시공관리 플랫폼 API
+  description: |
+    인테리어 견적·시공관리 플랫폼의 REST API 명세서.
+    `docs/screen-spec/screen-design-doc.html` (화면 설계서 20종)와
+    `docs/erd/interior-platform.dbml` (ERD)을 기준으로 작성되었습니다.
+
+    사용법: 이 파일 전체를 https://editor.swagger.io/ 에 붙여넣으면 API 문서/목업 서버를 확인할 수 있습니다.
+  version: 0.1.0
+  contact:
+    name: Interior Platform
+servers:
+  - url: /api/v1
+    description: 기본 API 서버 (버전 v1)
+
+tags:
+  - name: Auth
+    description: 회원가입 / 로그인 / 비밀번호 관리 (SCR-AUTH-001~004)
+  - name: RBAC
+    description: 역할기반 접근권한 관리 (SCR-AUTH-005)
+  - name: Vendors
+    description: 업체 가입 승인 관리 (SCR-COMP-001)
+  - name: VendorStaff
+    description: 소속 직원(현장담당자) 관리 (SCR-COMP-002)
+  - name: Inquiries
+    description: 시공 문의 등록/처리 (SCR-INQ-001~002)
+  - name: Classification
+    description: 문의 자동 분류 보조 (SCR-EXT-001, 규칙/통계 기반, LLM 아님)
+  - name: Projects
+    description: 프로젝트 (견적/계약/공정/결제/알림의 중심 엔티티)
+  - name: Quotes
+    description: 견적서 작성/승인 (SCR-QUOTE-001~002)
+  - name: Contracts
+    description: 계약서 생성/관리 (SCR-CONT-001)
+  - name: Process
+    description: 공정(시공) 관리 (SCR-PROC-001~002)
+  - name: Payments
+    description: 결제 단계 관리/이력 (SCR-PAY-001~002)
+  - name: Notifications
+    description: 알림 발송 이력/재발송 (SCR-NOTI-001)
+  - name: Dashboard
+    description: 업체 대시보드 / 고객 마이페이지 (SCR-DASH-001~002)
+
+security:
+  - bearerAuth: []
+
+paths:
+  # ───────────────────────── Auth (SCR-AUTH-001~004) ─────────────────────────
+  /auth/signup/vendor:
+    post:
+      tags: [Auth]
+      summary: 업체 관리자 회원가입
+      description: SCR-AUTH-001. 업체 정보 + 관리자 계정을 동시에 생성하고, vendor.status=pending 으로 승인 대기열에 등록합니다.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VendorSignupRequest"
+      responses:
+        "201":
+          description: 가입 신청 완료 (승인 대기)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorSignupResponse"
+        "409":
+          description: 이미 등록된 이메일 또는 사업자등록번호
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/signup/customer:
+    post:
+      tags: [Auth]
+      summary: 고객 회원가입
+      description: SCR-AUTH-002.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerSignupRequest"
+      responses:
+        "201":
+          description: 가입 완료
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "409":
+          description: 이미 등록된 이메일
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: 로그인
+      description: SCR-AUTH-003. 성공 시 accessToken(JWT)과 사용자/역할 정보를 반환합니다.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: 이메일 또는 비밀번호 불일치
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "423":
+          description: 계정 정지(suspended) 상태
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: 로그아웃
+      description: SCR-AUTH-003. 현재 세션의 accessToken을 무효화합니다.
+      responses:
+        "204":
+          description: 로그아웃 완료
+
+  /auth/password/reset-request:
+    post:
+      tags: [Auth]
+      summary: 비밀번호 재설정 요청
+      description: SCR-AUTH-004. 가입된 이메일로 재설정 링크/코드를 발송합니다.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        "202":
+          description: 재설정 메일 발송 요청 접수 (이메일 존재 여부와 무관하게 동일 응답)
+
+  /auth/password/reset:
+    post:
+      tags: [Auth]
+      summary: 비밀번호 재설정
+      description: SCR-AUTH-004. 재설정 토큰 검증 후 새 비밀번호로 변경합니다.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token: { type: string }
+                newPassword: { type: string, format: password, minLength: 8 }
+      responses:
+        "204":
+          description: 변경 완료
+        "400":
+          description: 토큰 만료 또는 유효하지 않음
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /auth/password:
+    put:
+      tags: [Auth]
+      summary: 비밀번호 변경 (로그인 상태)
+      description: SCR-AUTH-004.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword: { type: string, format: password, minLength: 8 }
+      responses:
+        "204":
+          description: 변경 완료
+        "401":
+          description: 현재 비밀번호 불일치
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /me:
+    get:
+      tags: [Auth]
+      summary: 내 계정 정보 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  # ───────────────────────── RBAC (SCR-AUTH-005) ─────────────────────────
+  /rbac/menu-access:
+    get:
+      tags: [RBAC]
+      summary: 역할별 메뉴 접근권한 목록
+      description: SCR-AUTH-005. platform_admin 전용.
+      parameters:
+        - name: roleKey
+          in: query
+          schema: { $ref: "#/components/schemas/RoleKey" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MenuAccess" }
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /rbac/menu-access/{menuAccessId}:
+    parameters:
+      - name: menuAccessId
+        in: path
+        required: true
+        schema: { type: integer }
+    put:
+      tags: [RBAC]
+      summary: 역할별 메뉴 접근권한 토글
+      description: SCR-AUTH-005 ①. 변경 시 audit_logs에 자동 기록됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [allowed]
+              properties:
+                allowed: { type: boolean }
+      responses:
+        "200":
+          description: 변경 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuAccess" }
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /rbac/api-scope:
+    get:
+      tags: [RBAC]
+      summary: 역할별 API 접근범위 조회 (읽기 전용)
+      description: SCR-AUTH-005 ③. 실제 서버 정책 확인용 읽기 전용 표.
+      parameters:
+        - name: roleKey
+          in: query
+          schema: { $ref: "#/components/schemas/RoleKey" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ApiScope" }
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  /audit-logs:
+    get:
+      tags: [RBAC]
+      summary: 감사 로그 조회
+      description: SCR-AUTH-005 ②. platform_admin 전용.
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogPage"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+
+  # ───────────────────────── Vendors (SCR-COMP-001) ─────────────────────────
+  /vendors:
+    get:
+      tags: [Vendors]
+      summary: 업체 목록 조회
+      description: SCR-COMP-001. 가입 승인 대기/승인/반려 업체 목록.
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/VendorStatus" }
+        - name: keyword
+          in: query
+          description: 상호명/사업자등록번호 검색
+          schema: { type: string }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VendorPage"
+
+  /vendors/{vendorId}:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+    get:
+      tags: [Vendors]
+      summary: 업체 상세 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Vendor" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Vendors]
+      summary: 업체 정보 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VendorUpdateRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Vendor" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /vendors/{vendorId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+    put:
+      tags: [Vendors]
+      summary: 업체 가입 승인
+      description: SCR-COMP-001. vendor.status를 approved로 전환합니다.
+      responses:
+        "200":
+          description: 승인 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Vendor" }
+        "409":
+          description: 이미 처리된 신청 건
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /vendors/{vendorId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+    put:
+      tags: [Vendors]
+      summary: 업체 가입 반려
+      description: SCR-COMP-001. vendor.status를 rejected로 전환하고 사유를 기록합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reason]
+              properties:
+                reason: { type: string, description: reject_reason }
+      responses:
+        "200":
+          description: 반려 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Vendor" }
+        "409":
+          description: 이미 처리된 신청 건
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # ───────────────────────── VendorStaff (SCR-COMP-002) ─────────────────────────
+  /vendors/{vendorId}/staff:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+    get:
+      tags: [VendorStaff]
+      summary: 소속 직원(현장담당자) 목록 조회
+      description: SCR-COMP-002.
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/StaffStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/VendorStaff" }
+    post:
+      tags: [VendorStaff]
+      summary: 직원 초대
+      description: SCR-COMP-002. 이메일로 초대하며 staff.status=invited로 생성됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, roleKey]
+              properties:
+                name: { type: string }
+                email: { type: string, format: email }
+                roleKey:
+                  type: string
+                  enum: [company_admin, site_manager]
+      responses:
+        "201":
+          description: 초대 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VendorStaff" }
+        "409":
+          description: 이미 초대/등록된 이메일
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /vendors/{vendorId}/staff/{staffId}:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+      - $ref: "#/components/parameters/StaffIdParam"
+    put:
+      tags: [VendorStaff]
+      summary: 직원 정보 수정
+      description: SCR-COMP-002.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                roleKey:
+                  type: string
+                  enum: [company_admin, site_manager]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VendorStaff" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    delete:
+      tags: [VendorStaff]
+      summary: 직원 삭제/소속 해제
+      description: SCR-COMP-002.
+      responses:
+        "204":
+          description: 삭제 완료
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /vendors/{vendorId}/staff/{staffId}/assignments:
+    parameters:
+      - $ref: "#/components/parameters/VendorIdParam"
+      - $ref: "#/components/parameters/StaffIdParam"
+    put:
+      tags: [VendorStaff]
+      summary: 현장담당자 ↔ 프로젝트 배정 갱신
+      description: SCR-COMP-002 assignedProjectIds. 전체 배정 목록을 교체합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [projectIds]
+              properties:
+                projectIds:
+                  type: array
+                  items: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { type: string }
+                description: 배정된 projectId 목록
+
+  # ───────────────────────── Inquiries (SCR-INQ-001~002) ─────────────────────────
+  /inquiries:
+    get:
+      tags: [Inquiries]
+      summary: 문의 목록 조회
+      description: SCR-INQ-002. 상태/담당자/분류태그로 필터링 가능.
+      parameters:
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/InquiryStatus" }
+        - name: assigneeStaffId
+          in: query
+          schema: { type: string }
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InquiryPage"
+    post:
+      tags: [Inquiries]
+      summary: 시공 문의 등록
+      description: SCR-INQ-001. 고객이 업체를 선택하여 문의를 등록합니다. 등록 시 자동분류(space_tag/budget_tag)가 함께 시도됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/InquiryCreateRequest" }
+      responses:
+        "201":
+          description: 등록 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /inquiries/{inquiryId}:
+    parameters:
+      - $ref: "#/components/parameters/InquiryIdParam"
+    get:
+      tags: [Inquiries]
+      summary: 문의 상세 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Inquiries]
+      summary: 문의 처리 (상태/분류 정정)
+      description: SCR-INQ-002. 담당자가 자동분류 결과를 수동 정정하면 corrected=true로 기록됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { $ref: "#/components/schemas/InquiryStatus" }
+                spaceTag: { type: string, nullable: true }
+                budgetTag: { type: string, nullable: true }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /inquiries/{inquiryId}/assign:
+    parameters:
+      - $ref: "#/components/parameters/InquiryIdParam"
+    put:
+      tags: [Inquiries]
+      summary: 문의 담당자 배정
+      description: SCR-INQ-002. status를 assigned로 전환합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [assigneeStaffId]
+              properties:
+                assigneeStaffId: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Inquiry" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ───────────────────────── Classification (SCR-EXT-001) ─────────────────────────
+  /classify-rules:
+    get:
+      tags: [Classification]
+      summary: 자동분류 규칙 목록 조회
+      description: SCR-EXT-001. 키워드→태그 규칙(공간유형/예산대), 규칙/통계 기반이며 LLM을 사용하지 않습니다.
+      parameters:
+        - name: type
+          in: query
+          schema: { $ref: "#/components/schemas/ClassifyRuleType" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ClassifyRule" }
+    post:
+      tags: [Classification]
+      summary: 자동분류 규칙 추가
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [keyword, tag, type]
+              properties:
+                keyword: { type: string }
+                tag: { type: string }
+                type: { $ref: "#/components/schemas/ClassifyRuleType" }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClassifyRule" }
+
+  /inquiries/{inquiryId}/classify:
+    parameters:
+      - $ref: "#/components/parameters/InquiryIdParam"
+    post:
+      tags: [Classification]
+      summary: 문의 자동 분류 재실행
+      description: SCR-EXT-001. 현재 등록된 규칙으로 재매칭하고 confidence/매칭 규칙 이력을 갱신합니다.
+      responses:
+        "200":
+          description: 분류 결과
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ClassifyResult" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ───────────────────────── Projects ─────────────────────────
+  /projects:
+    get:
+      tags: [Projects]
+      summary: 프로젝트 목록 조회
+      parameters:
+        - name: stage
+          in: query
+          schema: { $ref: "#/components/schemas/ProjectStage" }
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: customerId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectPage"
+    post:
+      tags: [Projects]
+      summary: 프로젝트 생성
+      description: 문의(inquiry) → 견적승인 → 계약 흐름에서 프로젝트로 전환 시 생성됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vendorId, customerId, name]
+              properties:
+                inquiryId: { type: string, nullable: true }
+                vendorId: { type: string }
+                customerId: { type: string }
+                name: { type: string }
+                siteAddress: { type: string }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+
+  /projects/{projectId}:
+    parameters:
+      - $ref: "#/components/parameters/ProjectIdParam"
+    get:
+      tags: [Projects]
+      summary: 프로젝트 상세 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+    put:
+      tags: [Projects]
+      summary: 프로젝트 정보/진행단계 수정
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                stage: { $ref: "#/components/schemas/ProjectStage" }
+                progress: { type: integer, minimum: 0, maximum: 100 }
+                startDate: { type: string, format: date }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ───────────────────────── Quotes (SCR-QUOTE-001~002) ─────────────────────────
+  /projects/{projectId}/quotes:
+    parameters:
+      - $ref: "#/components/parameters/ProjectIdParam"
+    get:
+      tags: [Quotes]
+      summary: 프로젝트별 견적 목록 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Quote" }
+    post:
+      tags: [Quotes]
+      summary: 견적서 작성
+      description: SCR-QUOTE-001. 최초 버전(v1.0)과 함께 견적을 생성합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuoteCreateRequest" }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quote" }
+        "422":
+          $ref: "#/components/responses/ValidationError"
+
+  /quotes/{quoteId}:
+    parameters:
+      - $ref: "#/components/parameters/QuoteIdParam"
+    get:
+      tags: [Quotes]
+      summary: 견적 상세 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quote" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /quotes/{quoteId}/versions:
+    parameters:
+      - $ref: "#/components/parameters/QuoteIdParam"
+    get:
+      tags: [Quotes]
+      summary: 견적 수정이력(버전) 조회
+      description: SCR-QUOTE-002.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/QuoteVersion" }
+    post:
+      tags: [Quotes]
+      summary: 견적 새 버전 추가
+      description: SCR-QUOTE-001. 단가/항목 수정 시 새 버전을 생성하고 quotes.current_total을 갱신합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/QuoteVersionCreateRequest" }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/QuoteVersion" }
+
+  /quotes/{quoteId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/QuoteIdParam"
+    put:
+      tags: [Quotes]
+      summary: 견적 승인
+      description: SCR-QUOTE-002. 고객이 최신 버전 견적을 승인합니다 (status=approved).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quote" }
+        "409":
+          description: 이미 처리된 견적
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /quotes/{quoteId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/QuoteIdParam"
+    put:
+      tags: [Quotes]
+      summary: 견적 반려
+      description: SCR-QUOTE-002. status=rejected.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Quote" }
+
+  # ───────────────────────── Contracts (SCR-CONT-001) ─────────────────────────
+  /projects/{projectId}/contracts:
+    parameters:
+      - $ref: "#/components/parameters/ProjectIdParam"
+    get:
+      tags: [Contracts]
+      summary: 프로젝트별 계약 목록 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Contract" }
+
+  /contracts:
+    post:
+      tags: [Contracts]
+      summary: 계약서 생성
+      description: SCR-CONT-001. 승인된 견적(quote.status=approved)을 기반으로 생성합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ContractCreateRequest" }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Contract" }
+        "409":
+          description: 승인되지 않은 견적으로 생성 시도
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /contracts/{contractId}:
+    parameters:
+      - $ref: "#/components/parameters/ContractIdParam"
+    get:
+      tags: [Contracts]
+      summary: 계약 상세 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Contract" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /contracts/{contractId}/status:
+    parameters:
+      - $ref: "#/components/parameters/ContractIdParam"
+    put:
+      tags: [Contracts]
+      summary: 계약 상태 변경
+      description: SCR-CONT-001. waiting → signed → completed. 변경 시 contract_history에 기록됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status: { $ref: "#/components/schemas/ContractStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Contract" }
+        "409":
+          description: 허용되지 않는 상태 전이
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /contracts/{contractId}/history:
+    parameters:
+      - $ref: "#/components/parameters/ContractIdParam"
+    get:
+      tags: [Contracts]
+      summary: 계약 상태 변경 이력 조회
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ContractHistoryItem" }
+
+  # ───────────────────────── Process (SCR-PROC-001~002) ─────────────────────────
+  /process-templates:
+    get:
+      tags: [Process]
+      summary: 공정 템플릿 목록 조회
+      description: SCR-PROC-001 ①. vendorId 미지정 시 플랫폼 공용 표준 템플릿을 포함합니다.
+      parameters:
+        - name: vendorId
+          in: query
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProcessTemplate" }
+    post:
+      tags: [Process]
+      summary: 공정 템플릿 생성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                vendorId: { type: string, nullable: true }
+                name: { type: string }
+                defaultDueOffsetDays: { type: integer }
+                sortOrder: { type: integer }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProcessTemplate" }
+
+  /projects/{projectId}/process-steps:
+    parameters:
+      - $ref: "#/components/parameters/ProjectIdParam"
+    get:
+      tags: [Process]
+      summary: 프로젝트별 공정 진행 상태 조회
+      description: SCR-PROC-001.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProcessStep" }
+    post:
+      tags: [Process]
+      summary: 공정 단계 추가
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                templateId: { type: string, nullable: true }
+                name: { type: string }
+                dueDate: { type: string, format: date }
+                sortOrder: { type: integer }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProcessStep" }
+
+  /process-steps/{stepId}:
+    parameters:
+      - $ref: "#/components/parameters/StepIdParam"
+    put:
+      tags: [Process]
+      summary: 공정 단계 진행률/상태 갱신
+      description: SCR-PROC-001. 지연 발생 시 delayed=true와 사유/기간을 함께 기록합니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                progress: { type: integer, minimum: 0, maximum: 100 }
+                status: { $ref: "#/components/schemas/ProcessStatus" }
+                delayed: { type: boolean }
+                delayReason: { type: string }
+                delayDuration: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProcessStep" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /process-steps/{stepId}/photos:
+    parameters:
+      - $ref: "#/components/parameters/StepIdParam"
+    get:
+      tags: [Process]
+      summary: 공정 단계별 시공 사진 조회
+      description: SCR-PROC-002. 업로드/고객 갤러리 공용.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProcessPhoto" }
+    post:
+      tags: [Process]
+      summary: 시공 사진 업로드
+      description: SCR-PROC-002. imageUrl은 사전 업로드된 파일의 URL을 참조합니다 (파일 업로드는 별도 스토리지 API 사용).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [imageUrl, takenAt]
+              properties:
+                imageUrl: { type: string, format: uri }
+                takenAt: { type: string, format: date-time }
+                memo: { type: string }
+      responses:
+        "201":
+          description: 업로드 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProcessPhoto" }
+
+  # ───────────────────────── Payments (SCR-PAY-001~002) ─────────────────────────
+  /projects/{projectId}/payment-milestones:
+    parameters:
+      - $ref: "#/components/parameters/ProjectIdParam"
+    get:
+      tags: [Payments]
+      summary: 결제 단계 목록 조회
+      description: SCR-PAY-001 등록/상태관리, SCR-PAY-002 이력 조회.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PaymentMilestone" }
+    post:
+      tags: [Payments]
+      summary: 결제 단계 등록
+      description: SCR-PAY-001. 예 - 계약금/중도금 1차/잔금.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, amount]
+              properties:
+                name: { type: string }
+                amount: { type: integer }
+                dueDate: { type: string, format: date }
+                memo: { type: string }
+                sortOrder: { type: integer }
+      responses:
+        "201":
+          description: 생성 완료
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentMilestone" }
+
+  /payment-milestones/{milestoneId}:
+    parameters:
+      - $ref: "#/components/parameters/MilestoneIdParam"
+    put:
+      tags: [Payments]
+      summary: 결제 상태 갱신
+      description: SCR-PAY-001. 입금 확인 시 status=done, confirmedDate를 기록하며 알림(notif_event_type=payment)이 발송됩니다.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { $ref: "#/components/schemas/MilestoneStatus" }
+                confirmedDate: { type: string, format: date }
+                memo: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaymentMilestone" }
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ───────────────────────── Notifications (SCR-NOTI-001) ─────────────────────────
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: 알림 발송 이력 조회
+      description: SCR-NOTI-001. 이벤트 기반 자동 발송 이력.
+      parameters:
+        - name: eventType
+          in: query
+          schema: { $ref: "#/components/schemas/NotifEventType" }
+        - name: status
+          in: query
+          schema: { $ref: "#/components/schemas/NotifStatus" }
+        - name: projectId
+          in: query
+          schema: { type: string }
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/SizeParam"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationLogPage"
+
+  /notifications/{notificationId}/resend:
+    parameters:
+      - name: notificationId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [Notifications]
+      summary: 발송 실패 알림 재발송
+      description: SCR-NOTI-001. status=fail 건에 한해 재발송을 허용합니다.
+      responses:
+        "200":
+          description: 재발송 처리 결과
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationLog" }
+        "409":
+          description: 이미 성공(success) 처리된 알림
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  # ───────────────────────── Dashboard (SCR-DASH-001~002) ─────────────────────────
+  /dashboard/company:
+    get:
+      tags: [Dashboard]
+      summary: 업체 대시보드 요약 조회
+      description: SCR-DASH-001. company_admin/site_manager 전용. 진행중 프로젝트, 처리 대기 문의, 결제 현황 등 요약 지표.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CompanyDashboard" }
+
+  /dashboard/my:
+    get:
+      tags: [Dashboard]
+      summary: 고객 마이페이지 요약 조회
+      description: SCR-DASH-002. customer 전용. 내 프로젝트 진행 현황, 최신 견적/결제 상태 요약.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CustomerDashboard" }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: 페이지 번호 (0부터 시작)
+      schema: { type: integer, minimum: 0, default: 0 }
+    SizeParam:
+      name: size
+      in: query
+      description: 페이지당 항목 수
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    VendorIdParam:
+      name: vendorId
+      in: path
+      required: true
+      schema: { type: string }
+    StaffIdParam:
+      name: staffId
+      in: path
+      required: true
+      schema: { type: string }
+    InquiryIdParam:
+      name: inquiryId
+      in: path
+      required: true
+      schema: { type: string }
+    ProjectIdParam:
+      name: projectId
+      in: path
+      required: true
+      schema: { type: string }
+    QuoteIdParam:
+      name: quoteId
+      in: path
+      required: true
+      schema: { type: string }
+    ContractIdParam:
+      name: contractId
+      in: path
+      required: true
+      schema: { type: string }
+    StepIdParam:
+      name: stepId
+      in: path
+      required: true
+      schema: { type: string }
+    MilestoneIdParam:
+      name: milestoneId
+      in: path
+      required: true
+      schema: { type: string }
+
+  responses:
+    NotFound:
+      description: 리소스를 찾을 수 없음
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: 접근 권한 없음 (RBAC)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    ValidationError:
+      description: 입력값 검증 실패
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ValidationError" }
+
+  schemas:
+    # ── 공통 ──
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code: { type: string, example: "NOT_FOUND" }
+        message: { type: string, example: "리소스를 찾을 수 없습니다." }
+
+    ValidationError:
+      type: object
+      required: [code, message, fields]
+      properties:
+        code: { type: string, example: "VALIDATION_ERROR" }
+        message: { type: string }
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              reason: { type: string }
+
+    RoleKey:
+      type: string
+      description: |
+        guest는 비로그인 상태를 뜻하며 users 테이블에는 저장되지 않습니다 (화면 접근권한 표기용).
+      enum: [guest, company_admin, site_manager, customer, platform_admin]
+
+    # ── Auth ──
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        phone: { type: string, nullable: true }
+        roleKey: { $ref: "#/components/schemas/RoleKey" }
+        status: { type: string, enum: [active, suspended] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, nullable: true, format: date-time }
+
+    AuthSession:
+      type: object
+      properties:
+        accessToken: { type: string }
+        tokenType: { type: string, example: Bearer }
+        expiresIn: { type: integer, example: 3600 }
+        user: { $ref: "#/components/schemas/User" }
+
+    VendorSignupRequest:
+      type: object
+      required: [name, bizNo, ceo, email, password, managerName]
+      properties:
+        name: { type: string, description: 상호명 }
+        bizNo: { type: string, description: 사업자등록번호 }
+        ceo: { type: string, description: 대표자명 }
+        bizType: { type: string, description: 업태/종목 }
+        address: { type: string, description: 사업장 주소 }
+        contact: { type: string, description: 담당자 연락처 }
+        managerName: { type: string, description: 담당자명 }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        intro: { type: string, nullable: true }
+
+    VendorSignupResponse:
+      type: object
+      properties:
+        vendor: { $ref: "#/components/schemas/Vendor" }
+        user: { $ref: "#/components/schemas/User" }
+
+    CustomerSignupRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string, nullable: true }
+        password: { type: string, format: password, minLength: 8 }
+
+    # ── RBAC ──
+    MenuAccess:
+      type: object
+      properties:
+        id: { type: integer }
+        roleKey: { $ref: "#/components/schemas/RoleKey" }
+        menu: { type: string, example: 결제관리 }
+        screenId: { type: string, example: SCR-PAY-001 }
+        allowed: { type: boolean }
+
+    ApiScope:
+      type: object
+      properties:
+        id: { type: integer }
+        roleKey: { $ref: "#/components/schemas/RoleKey" }
+        path: { type: string, example: /api/v1/projects }
+        method: { type: string, enum: [GET, POST, PUT, DELETE] }
+        allowed: { type: boolean }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: integer }
+        actorUserId: { type: string, nullable: true }
+        actorLabel: { type: string, example: admin@platform.co }
+        at: { type: string, format: date-time }
+        change: { type: string, example: "업체 관리자 · 결제관리(SCR-PAY-001) 접근 허용 → 차단" }
+
+    AuditLogPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/AuditLog" }
+
+    # ── Vendors ──
+    VendorStatus:
+      type: string
+      enum: [pending, approved, rejected]
+
+    Vendor:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        bizNo: { type: string }
+        ceo: { type: string }
+        bizType: { type: string, nullable: true }
+        address: { type: string, nullable: true }
+        contact: { type: string, nullable: true }
+        managerName: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        intro: { type: string, nullable: true }
+        logoUrl: { type: string, nullable: true }
+        status: { $ref: "#/components/schemas/VendorStatus" }
+        appliedAt: { type: string, format: date-time }
+        processedAt: { type: string, nullable: true, format: date-time }
+        processedBy: { type: string, nullable: true, description: 승인/반려 처리한 플랫폼관리자 id }
+        rejectReason: { type: string, nullable: true }
+
+    VendorUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        bizType: { type: string }
+        address: { type: string }
+        contact: { type: string }
+        managerName: { type: string }
+        email: { type: string }
+        intro: { type: string }
+        logoUrl: { type: string }
+
+    VendorPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/Vendor" }
+
+    # ── VendorStaff ──
+    StaffStatus:
+      type: string
+      enum: [invited, active]
+
+    VendorStaff:
+      type: object
+      properties:
+        id: { type: string }
+        vendorId: { type: string }
+        userId: { type: string, nullable: true, description: invited 상태에서는 계정 미생성일 수 있어 nullable }
+        name: { type: string }
+        email: { type: string }
+        roleKey:
+          type: string
+          enum: [company_admin, site_manager]
+        status: { $ref: "#/components/schemas/StaffStatus" }
+        invitedAt: { type: string, format: date-time }
+        assignedProjectIds:
+          type: array
+          items: { type: string }
+
+    # ── Inquiries ──
+    InquiryStatus:
+      type: string
+      enum: [received, assigned, quoted, closed]
+
+    ConfidenceLevel:
+      type: string
+      enum: ["상", "중", "하"]
+
+    Inquiry:
+      type: object
+      properties:
+        id: { type: string }
+        customerId: { type: string }
+        vendorId: { type: string, nullable: true, description: 고객이 선택한 업체 }
+        summary: { type: string }
+        desiredSchedule: { type: string, nullable: true }
+        spaceTag: { type: string, nullable: true, description: null=미분류 }
+        budgetTag: { type: string, nullable: true, description: null=미분류 }
+        confidence: { $ref: "#/components/schemas/ConfidenceLevel" }
+        corrected: { type: boolean, description: 담당자가 자동분류 결과를 수동 정정했는지 여부 }
+        status: { $ref: "#/components/schemas/InquiryStatus" }
+        assigneeStaffId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    InquiryCreateRequest:
+      type: object
+      required: [summary]
+      properties:
+        vendorId: { type: string, nullable: true }
+        summary: { type: string }
+        desiredSchedule: { type: string, nullable: true }
+
+    InquiryPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/Inquiry" }
+
+    # ── Classification ──
+    ClassifyRuleType:
+      type: string
+      enum: ["공간유형", "예산대"]
+
+    ClassifyRule:
+      type: object
+      properties:
+        id: { type: string }
+        keyword: { type: string }
+        tag: { type: string }
+        type: { $ref: "#/components/schemas/ClassifyRuleType" }
+
+    ClassifyResult:
+      type: object
+      properties:
+        inquiryId: { type: string }
+        spaceTag: { type: string, nullable: true }
+        budgetTag: { type: string, nullable: true }
+        confidence: { $ref: "#/components/schemas/ConfidenceLevel" }
+        spaceRules:
+          type: array
+          items: { $ref: "#/components/schemas/ClassifyRule" }
+        budgetRules:
+          type: array
+          items: { $ref: "#/components/schemas/ClassifyRule" }
+
+    # ── Projects ──
+    ProjectStage:
+      type: string
+      enum: [contract, demolition, framing, finishing, handover]
+      description: 계약·실측 / 철거·설비 / 목공·전기 / 마감·도장 / 준공·검수
+
+    Project:
+      type: object
+      properties:
+        id: { type: string }
+        inquiryId: { type: string, nullable: true }
+        vendorId: { type: string }
+        customerId: { type: string }
+        name: { type: string }
+        siteAddress: { type: string, nullable: true }
+        stage: { $ref: "#/components/schemas/ProjectStage" }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        startDate: { type: string, nullable: true, format: date }
+        updatedAt: { type: string, format: date-time }
+
+    ProjectPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/Project" }
+
+    # ── Quotes ──
+    QuoteStatus:
+      type: string
+      enum: [pending, approved, rejected]
+
+    QuoteLineItemInput:
+      type: object
+      required: [name, qty, unitPrice]
+      properties:
+        name: { type: string }
+        spec: { type: string, nullable: true }
+        qty: { type: integer, minimum: 1 }
+        unitPrice: { type: integer, minimum: 0 }
+
+    QuoteLineItem:
+      allOf:
+        - $ref: "#/components/schemas/QuoteLineItemInput"
+        - type: object
+          properties:
+            id: { type: string }
+            quoteVersionId: { type: string }
+
+    QuoteVersionCreateRequest:
+      type: object
+      required: [lineItems]
+      properties:
+        summary: { type: string, nullable: true, example: 도배 단가 조정 }
+        lineItems:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/QuoteLineItemInput" }
+
+    QuoteVersion:
+      type: object
+      properties:
+        id: { type: string }
+        quoteId: { type: string }
+        version: { type: string, example: v1.1 }
+        updatedAt: { type: string, format: date-time }
+        updatedBy: { type: string, nullable: true }
+        summary: { type: string, nullable: true }
+        total: { type: integer }
+        lineItems:
+          type: array
+          items: { $ref: "#/components/schemas/QuoteLineItem" }
+
+    QuoteCreateRequest:
+      type: object
+      required: [issuedAt, lineItems]
+      properties:
+        issuedAt: { type: string, format: date-time }
+        validUntil: { type: string, nullable: true, format: date }
+        lineItems:
+          type: array
+          minItems: 1
+          items: { $ref: "#/components/schemas/QuoteLineItemInput" }
+
+    Quote:
+      type: object
+      properties:
+        id: { type: string }
+        quoteNo: { type: string }
+        projectId: { type: string }
+        status: { $ref: "#/components/schemas/QuoteStatus" }
+        issuedAt: { type: string, format: date-time }
+        validUntil: { type: string, nullable: true, format: date }
+        currentTotal: { type: integer, description: 최신 버전 합계액 (비정규화 캐시) }
+        latestVersion: { $ref: "#/components/schemas/QuoteVersion" }
+
+    # ── Contracts ──
+    ContractStatus:
+      type: string
+      enum: [waiting, signed, completed]
+      description: 계약대기 / 체결 / 완료
+
+    ContractCreateRequest:
+      type: object
+      required: [projectId, quoteId, amount]
+      properties:
+        projectId: { type: string }
+        quoteId: { type: string, description: 승인된 견적 id }
+        amount: { type: integer }
+        periodStart: { type: string, nullable: true, format: date }
+        periodEnd: { type: string, nullable: true, format: date }
+        downPaymentMemo: { type: string, nullable: true }
+
+    Contract:
+      type: object
+      properties:
+        id: { type: string }
+        contractNo: { type: string }
+        projectId: { type: string }
+        quoteId: { type: string, nullable: true }
+        vendorId: { type: string }
+        customerId: { type: string }
+        status: { $ref: "#/components/schemas/ContractStatus" }
+        amount: { type: integer }
+        periodStart: { type: string, nullable: true, format: date }
+        periodEnd: { type: string, nullable: true, format: date }
+        signedAt: { type: string, nullable: true, format: date-time }
+        downPaymentMemo: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+
+    ContractHistoryItem:
+      type: object
+      properties:
+        id: { type: string }
+        contractId: { type: string }
+        changedBy: { type: string, nullable: true }
+        changedAt: { type: string, format: date-time }
+        fromStatus: { $ref: "#/components/schemas/ContractStatus" }
+        toStatus: { $ref: "#/components/schemas/ContractStatus" }
+
+    # ── Process ──
+    ProcessTemplate:
+      type: object
+      properties:
+        id: { type: string }
+        vendorId: { type: string, nullable: true, description: "null = 플랫폼 공용 표준 템플릿" }
+        name: { type: string }
+        defaultDueOffsetDays: { type: integer, nullable: true, description: 착공일 기준 기본 마감 오프셋 }
+        sortOrder: { type: integer }
+
+    ProcessStatus:
+      type: string
+      enum: [todo, doing, done]
+      description: 예정 / 진행중 / 완료
+
+    ProcessStep:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        templateId: { type: string, nullable: true }
+        name: { type: string }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        dueDate: { type: string, nullable: true, format: date }
+        status: { $ref: "#/components/schemas/ProcessStatus" }
+        delayed: { type: boolean }
+        delayReason: { type: string, nullable: true }
+        delayDuration: { type: string, nullable: true }
+        sortOrder: { type: integer }
+
+    ProcessPhoto:
+      type: object
+      properties:
+        id: { type: string }
+        processStepId: { type: string }
+        projectId: { type: string }
+        imageUrl: { type: string, format: uri }
+        takenAt: { type: string, format: date-time }
+        memo: { type: string, nullable: true }
+        uploadedBy: { type: string, nullable: true }
+
+    # ── Payments ──
+    MilestoneStatus:
+      type: string
+      enum: [pending, done]
+
+    PaymentMilestone:
+      type: object
+      properties:
+        id: { type: string }
+        projectId: { type: string }
+        name: { type: string, example: "계약금 | 중도금 1차 | 잔금" }
+        amount: { type: integer }
+        dueDate: { type: string, nullable: true, format: date }
+        status: { $ref: "#/components/schemas/MilestoneStatus" }
+        confirmedDate: { type: string, nullable: true, format: date }
+        memo: { type: string, nullable: true }
+        sortOrder: { type: integer }
+
+    # ── Notifications ──
+    NotifEventType:
+      type: string
+      enum: [quote, contract, progress, payment]
+      description: 견적발송 / 계약승인요청 / 공정업데이트 / 결제상태변경
+
+    NotifStatus:
+      type: string
+      enum: [success, fail]
+
+    NotificationLog:
+      type: object
+      properties:
+        id: { type: string }
+        userId: { type: string, nullable: true, description: "수신자, 비회원 발송 대비 nullable" }
+        projectId: { type: string, nullable: true }
+        phoneMasked: { type: string, description: "화면 표시는 항상 마스킹 처리됨 (REQ-NFR-007)", example: "010-****-5678" }
+        eventType: { $ref: "#/components/schemas/NotifEventType" }
+        template: { type: string }
+        body: { type: string }
+        status: { $ref: "#/components/schemas/NotifStatus" }
+        failReason: { type: string, nullable: true }
+        sentAt: { type: string, format: date-time }
+
+    NotificationLogPage:
+      allOf:
+        - $ref: "#/components/schemas/PageMeta"
+        - type: object
+          properties:
+            items:
+              type: array
+              items: { $ref: "#/components/schemas/NotificationLog" }
+
+    # ── Dashboard ──
+    CompanyDashboard:
+      type: object
+      description: SCR-DASH-001
+      properties:
+        activeProjectCount: { type: integer }
+        pendingInquiryCount: { type: integer }
+        pendingQuoteCount: { type: integer }
+        upcomingPaymentMilestones:
+          type: array
+          items: { $ref: "#/components/schemas/PaymentMilestone" }
+        recentProjects:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+
+    CustomerDashboard:
+      type: object
+      description: SCR-DASH-002
+      properties:
+        projects:
+          type: array
+          items: { $ref: "#/components/schemas/Project" }
+        latestQuote: { $ref: "#/components/schemas/Quote" }
+        nextPaymentMilestone: { $ref: "#/components/schemas/PaymentMilestone" }
+        recentProcessSteps:
+          type: array
+          items: { $ref: "#/components/schemas/ProcessStep" }
+
+    # ── 페이지네이션 공통 ──
+    PageMeta:
+      type: object
+      properties:
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer }
+        totalPages: { type: integer }
